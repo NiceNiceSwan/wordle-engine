@@ -10,17 +10,18 @@ void Game_state::_analyze_pattern(char_vector word, char_vector pattern)
 {
 	for (unsigned short int index = 0; index < word.size(); index++)
 	{
-		char letter = pattern[index];
-		switch (letter)
+		char pattern_letter = pattern[index];
+		char word_letter = word[index];
+		switch (pattern_letter)
 		{
 		case 'y':
-			_words = _filter_yellow_letters(letter, index);
+			_words = _filter_yellow_letters(word_letter, index);
 			break;
 		case 'b':
-			_black_letters.push_back(letter);
+			_black_letters.push_back(word_letter);
 			break;
 		case 'g':
-			_exact_match[index] = letter;
+			_exact_match[index] = word_letter;
 			break;
 		default:
 			break;
@@ -33,14 +34,18 @@ string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int
 	string_vector resulting_list;
 	char_vector pattern_vector(LETTER_COUNT, '.');
 	pattern_vector[index] = letter;
-	std::regex word_pattern(std::string(pattern_vector.begin(), pattern_vector.end()));
-	std::regex letter_pattern(std::string(letter, 1));
+	const std::string pattern_string(std::string(pattern_vector.begin(), pattern_vector.end()));
+	const std::regex word_pattern(pattern_string);
+	const std::string letter_string(1, letter);
+	const std::regex letter_pattern(letter_string);
 	std::string word;
 
 	for (size_t index = 0; index < _words.size(); index++)
 	{
 		word = _words[index];
-		if (std::regex_match(word, letter_pattern) && !std::regex_match(word, word_pattern))
+		bool test_1 = std::regex_search(word, letter_pattern);
+		bool test_2 = !std::regex_search(word, word_pattern);
+		if (test_1 && test_2)
 		{
 			resulting_list.push_back(word);
 		}
@@ -64,7 +69,7 @@ string_vector Game_state::_exclude_black_letters()
 		{
 			black_letter = _black_letters[black_letter_index];
 			std::regex letter_pattern(black_letter);
-			if (std::regex_match(word, letter_pattern))
+			if (std::regex_search(word, letter_pattern))
 			{
 				forbidden = true;
 				break;
@@ -89,7 +94,7 @@ string_vector Game_state::_match_exact_patterns(string_vector words)
 	{
 		word = words[index];
 		std::regex word_pattern(exact_match_string);
-		if (std::regex_match(word, word_pattern))
+		if (std::regex_search(word, word_pattern))
 		{
 			resulting_word_list.push_back(word);
 		}

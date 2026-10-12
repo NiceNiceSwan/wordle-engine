@@ -31,4 +31,6 @@ public:
 	Game_state(string_vector words);
 
 	void filter_words(char_vector word, char_vector pattern);
+
+	string_vector* words() { return &_words; };
 };
