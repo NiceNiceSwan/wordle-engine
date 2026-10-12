@@ -19,12 +19,26 @@ void play_wordle();
 
 void get_initial_bit_count();
 
+double simulate_word_probabilities_base(string word);
+
 double simulate_word_probabilities(string word, promise<double> promise);
 
 int main()
 {
+	string_vector words = get_words_list();
+
+	Game_state::all_words(words);
 	// get_initial_bit_count();
-	play_wordle();
+	// play_wordle();
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::chrono::milliseconds duration;
+
+	start = std::chrono::high_resolution_clock::now();
+	cout << simulate_word_probabilities_base("helio") << endl;
+	stop = std::chrono::high_resolution_clock::now();
+	duration = duration_cast<std::chrono::milliseconds>(stop - start);
+	std::cout << "Analyzing pattern took: " << duration << std::endl;
 
 	return 0;
 }
@@ -123,7 +137,7 @@ void get_initial_bit_count()
 	
 }
 
-double simulate_word_probabilities(string word, promise<double> promise)
+double simulate_word_probabilities_base(string word)
 {
 	char_vector word_vector(word.begin(), word.end());
 	string pattern;
@@ -149,9 +163,14 @@ double simulate_word_probabilities(string word, promise<double> promise)
 		information = -log2(probability);
 		total_bits_amount += probability * information;
 	}
-	// double final_information_amount = total_bits_amount / Game_state::word_count();
-	promise.set_value(total_bits_amount);
 	return total_bits_amount;
+}
+
+double simulate_word_probabilities(string word, promise<double> promise)
+{
+	double value = simulate_word_probabilities_base(word);
+	promise.set_value(value);
+	return value;
 }
 
 string_vector get_words_list(string filename)
