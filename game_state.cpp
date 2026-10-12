@@ -1,5 +1,11 @@
 #include "game_state.h"
 
+Game_state::Game_state()
+{
+	_words = _all_words;
+	_exact_match = char_vector(LETTER_COUNT, '.');
+}
+
 Game_state::Game_state(string_vector words)
 {
 	_words = words;
@@ -101,6 +107,31 @@ string_vector Game_state::_match_exact_patterns(string_vector words)
 	}
 	
 	return resulting_word_list;
+}
+
+std::string Game_state::convert_number_to_combination(unsigned short int number)
+{
+	std::string result;
+	unsigned short int remainder;
+	while (number > 0)
+	{
+		remainder = number % 3;
+		switch (remainder)
+		{
+		case BLACK:
+			result += "b";
+			break;
+		case YELLOW:
+			result += "y";
+			break;
+		case GREEN:
+			result += "g";
+			break;
+		}
+		number /= 3;
+	}
+	
+	return result;
 }
 
 void Game_state::filter_words(char_vector word, char_vector pattern)
