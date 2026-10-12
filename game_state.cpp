@@ -1,0 +1,108 @@
+#include "game_state.h"
+
+Game_state::Game_state(string_vector words)
+{
+	_words = words;
+	_exact_match = char_vector(LETTER_COUNT, '.');
+}
+
+void Game_state::_analyze_pattern(char_vector word, char_vector pattern)
+{
+	for (unsigned short int index = 0; index < word.size(); index++)
+	{
+		char letter = pattern[index];
+		switch (letter)
+		{
+		case 'y':
+			_words = _filter_yellow_letters(letter, index);
+			break;
+		case 'b':
+			_black_letters.push_back(letter);
+			break;
+		case 'g':
+			_exact_match[index] = letter;
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int index)
+{
+	string_vector resulting_list;
+	char_vector pattern_vector(LETTER_COUNT, '.');
+	pattern_vector[index] = letter;
+	std::regex word_pattern(std::string(pattern_vector.begin(), pattern_vector.end()));
+	std::regex letter_pattern(std::string(letter, 1));
+	std::string word;
+
+	for (size_t index = 0; index < _words.size(); index++)
+	{
+		word = _words[index];
+		if (std::regex_match(word, letter_pattern) && !std::regex_match(word, word_pattern))
+		{
+			resulting_list.push_back(word);
+		}
+	}
+	
+	return resulting_list;
+}
+
+string_vector Game_state::_exclude_black_letters()
+{
+	string_vector resulting_word_list;
+	bool forbidden = false;
+	std::string word;
+	std::string black_letter;
+
+	for (size_t index = 0; index < _words.size(); index++)
+	{
+		word = _words[index];
+		forbidden = false;
+		for (size_t black_letter_index = 0; black_letter_index < _black_letters.size(); black_letter_index++)
+		{
+			black_letter = _black_letters[black_letter_index];
+			std::regex letter_pattern(black_letter);
+			if (std::regex_match(word, letter_pattern))
+			{
+				forbidden = true;
+				break;
+			}
+		}
+		
+		if (!forbidden)
+		{
+			resulting_word_list.push_back(word);
+		}
+	}
+	
+	return resulting_word_list;
+}
+
+string_vector Game_state::_match_exact_patterns(string_vector words)
+{
+	std::string exact_match_string(_exact_match.begin(), _exact_match.end());
+	std::string word;
+	string_vector resulting_word_list;
+	for (size_t index = 0; index < words.size(); index++)
+	{
+		word = words[index];
+		std::regex word_pattern(exact_match_string);
+		if (std::regex_match(word, word_pattern))
+		{
+			resulting_word_list.push_back(word);
+		}
+	}
+	
+	return resulting_word_list;
+}
+
+void Game_state::filter_words(char_vector word, char_vector pattern)
+{
+	_analyze_pattern(word, pattern);
+
+	string_vector swap_list = _exclude_black_letters();
+
+	_words = _match_exact_patterns(swap_list);
+}
