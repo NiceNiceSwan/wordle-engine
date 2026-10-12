@@ -3,12 +3,15 @@
 #include <thread>
 #include <future>
 #include <cmath>
+#include <chrono>
 
 #define MAX_PATTERN_COMBINATIONS pow(3, 5)
+#define MAX_THREADS 10
 
 #include "game_state.h"
 
 using namespace std;
+using namespace chrono;
 
 string_vector get_words_list(string filename = "word_list_2.txt");
 
@@ -20,7 +23,8 @@ double simulate_word_probabilities(string word, promise<double> promise);
 
 int main()
 {
-	get_initial_bit_count();
+	// get_initial_bit_count();
+	play_wordle();
 
 	return 0;
 }
@@ -47,7 +51,14 @@ void play_wordle()
 		cin >> pattern;
 		pattern_vector = char_vector(pattern.begin(), pattern.end());
 
-		game_state.filter_words(word_vector, pattern_vector);
+		auto start = high_resolution_clock::now();
+		auto stop = high_resolution_clock::now();
+		start = high_resolution_clock::now();
+		game_state.filter_words(&word_vector, &pattern_vector);
+		stop = high_resolution_clock::now();
+
+		microseconds duration = duration_cast<microseconds>(stop - start);
+		cout << "Calculations took: " << duration << endl;
 
 		game_state_words = game_state.words();
 
@@ -69,23 +80,45 @@ void get_initial_bit_count()
 	vector<thread> threads;
 	vector<promise<double>> promises;
 	vector<future<double>> futures;
-	threads.reserve(words.size());
-	promises.resize(words.size());
-	futures.resize(words.size());
 
-	for (size_t word_index = 0; word_index < words.size(); word_index++)
-	{
-		word = words[word_index];
-		futures[word_index] = promises[word_index].get_future();
-		threads.push_back(thread(simulate_word_probabilities, word, move(promises[word_index])));
-	}
-	
 	double information;
-	for (size_t index = 0; index < threads.size(); index++)
+	int repeats = (double)words.size() / MAX_THREADS;
+
+	for (size_t repeat = 0; repeat < repeats; repeat++)
 	{
-		threads[index].join();
-		information = futures[index].get();
-		cout << "Word: " << words[index] << ", information: " << information << " bits\n";
+		threads.resize(MAX_THREADS);
+		promises.resize(MAX_THREADS);
+		futures.resize(MAX_THREADS);
+		int starting_index = MAX_THREADS * repeat;
+		int end_index = MAX_THREADS * (repeat + 1);
+		int threads_to_create = MAX_THREADS;
+		if (end_index > words.size())
+		{
+			threads_to_create = MAX_THREADS - (end_index - words.size());
+		}
+		
+		for (size_t index = 0; index < threads_to_create; index++)
+		{
+			word = words[starting_index + index];
+			futures[index] = promises[index].get_future();
+			threads[index] = thread(simulate_word_probabilities, word, move(promises[index]));
+		}
+		
+		cout << "Thread batch " << repeat << " creation finished." << endl;
+
+		auto start = high_resolution_clock::now();
+		for (size_t index = 0; index < threads_to_create; index++)
+		{
+			threads[index].join();
+			information = futures[index].get();
+			cout << "Word: " << words[index] << ", information: " << information << " bits\n";
+		}
+		auto stop = high_resolution_clock::now();
+		milliseconds duration = duration_cast<milliseconds>(stop - start);
+		cout << "Calculating batch took: " << duration << "ms" << endl;
+		threads.clear();
+		futures.clear();
+		promises.clear();
 	}
 	
 }
@@ -104,16 +137,21 @@ double simulate_word_probabilities(string word, promise<double> promise)
 		pattern = Game_state::convert_number_to_combination(combination);
 		pattern_vector = char_vector(pattern.begin(), pattern.end());
 
-		game_state.filter_words(word_vector, pattern_vector);
+		game_state.filter_words(&word_vector, &pattern_vector);
 		string_vector* remaining_words = game_state.words();
 
 		probability = (double)remaining_words->size() / Game_state::word_count();
+		if (probability == 0)
+		{
+			continue;
+		}
+		
 		information = -log2(probability);
 		total_bits_amount += probability * information;
 	}
-	double final_information_amount = total_bits_amount / Game_state::word_count();
-	promise.set_value(final_information_amount);
-	return final_information_amount;
+	// double final_information_amount = total_bits_amount / Game_state::word_count();
+	promise.set_value(total_bits_amount);
+	return total_bits_amount;
 }
 
 string_vector get_words_list(string filename)

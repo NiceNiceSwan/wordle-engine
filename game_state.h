@@ -29,7 +29,7 @@ private:
 	/// @param word the inputted word
 	/// @param pattern the pattern given upon inputting the word
 	*/
-	void _analyze_pattern(char_vector word, char_vector pattern);
+	void _analyze_pattern(const char_vector* word, const char_vector* pattern);
 
 	/** @brief filters words based on the given yellow letter and its position
 	/// @param letter the letter marked in yellow
@@ -53,7 +53,7 @@ public:
 	Game_state();
 	Game_state(string_vector words);
 
-	void filter_words(char_vector word, char_vector pattern);
+	void filter_words(const char_vector* word, const char_vector* pattern);
 
 	// getters
 	string_vector* words() { return &_words; };

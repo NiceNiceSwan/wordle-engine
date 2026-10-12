@@ -1,4 +1,9 @@
 #include "game_state.h"
+#include <chrono>
+#include <iostream>
+
+string_vector Game_state::_all_words;
+unsigned long long int Game_state::_word_count;
 
 Game_state::Game_state()
 {
@@ -12,12 +17,12 @@ Game_state::Game_state(string_vector words)
 	_exact_match = char_vector(LETTER_COUNT, '.');
 }
 
-void Game_state::_analyze_pattern(char_vector word, char_vector pattern)
+void Game_state::_analyze_pattern(const char_vector* word, const char_vector* pattern)
 {
-	for (unsigned short int index = 0; index < word.size(); index++)
+	for (unsigned short int index = 0; index < word->size(); index++)
 	{
-		char pattern_letter = pattern[index];
-		char word_letter = word[index];
+		char pattern_letter = pattern->at(index);
+		char word_letter = word->at(index);
 		switch (pattern_letter)
 		{
 		case 'y':
@@ -38,6 +43,7 @@ void Game_state::_analyze_pattern(char_vector word, char_vector pattern)
 string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int index)
 {
 	string_vector resulting_list;
+	resulting_list.reserve(_words.size());
 	char_vector pattern_vector(LETTER_COUNT, '.');
 	pattern_vector[index] = letter;
 	const std::string pattern_string(std::string(pattern_vector.begin(), pattern_vector.end()));
@@ -49,9 +55,7 @@ string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int
 	for (size_t index = 0; index < _words.size(); index++)
 	{
 		word = _words[index];
-		bool test_1 = std::regex_search(word, letter_pattern);
-		bool test_2 = !std::regex_search(word, word_pattern);
-		if (test_1 && test_2)
+		if (std::regex_search(word, letter_pattern) && !std::regex_search(word, word_pattern))
 		{
 			resulting_list.push_back(word);
 		}
@@ -63,6 +67,7 @@ string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int
 string_vector Game_state::_exclude_black_letters()
 {
 	string_vector resulting_word_list;
+	resulting_word_list.reserve(_words.size());
 	bool forbidden = false;
 	std::string word;
 	std::string black_letter;
@@ -96,6 +101,7 @@ string_vector Game_state::_match_exact_patterns(string_vector words)
 	std::string exact_match_string(_exact_match.begin(), _exact_match.end());
 	std::string word;
 	string_vector resulting_word_list;
+	resulting_word_list.reserve(_words.size());
 	for (size_t index = 0; index < words.size(); index++)
 	{
 		word = words[index];
@@ -130,15 +136,36 @@ std::string Game_state::convert_number_to_combination(unsigned short int number)
 		}
 		number /= 3;
 	}
-	
+	int missing_letters = LETTER_COUNT - result.size();
+	if (missing_letters > 0)
+	{
+		result.insert(0, missing_letters, 'b');
+	}
+
 	return result;
 }
 
-void Game_state::filter_words(char_vector word, char_vector pattern)
+void Game_state::filter_words(const char_vector* word, const char_vector* pattern)
 {
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::chrono::microseconds duration;
+
+	start = std::chrono::high_resolution_clock::now();
 	_analyze_pattern(word, pattern);
+	stop = std::chrono::high_resolution_clock::now();
+	duration = duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << "Analyzing pattern took: " << duration << std::endl;
 
+	start = std::chrono::high_resolution_clock::now();
 	string_vector swap_list = _exclude_black_letters();
+	stop = std::chrono::high_resolution_clock::now();
+	duration = duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << "Excluding black letters took: " << duration << std::endl;
 
+	start = std::chrono::high_resolution_clock::now();
 	_words = _match_exact_patterns(swap_list);
+	stop = std::chrono::high_resolution_clock::now();
+	duration = duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << "matching exact patterns took: " << duration << std::endl;
 }
