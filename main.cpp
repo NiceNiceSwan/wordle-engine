@@ -7,7 +7,6 @@
 #include <regex>
 
 #define MAX_PATTERN_COMBINATIONS pow(3, 5)
-#define MAX_THREADS 100
 #define INPUT_FILE_NAME "word_list_2.txt"
 #define OUTPUT_FILE_NAME "first_guess_bits.txt"
 
@@ -33,8 +32,8 @@ double simulate_word_probabilities(string word, promise<double> promise, string_
 int main()
 {
 	initialize();
-	// get_initial_bit_count();
-	play_wordle();
+	get_initial_bit_count();
+	// play_wordle();
 	// tests();
 
 	return 0;
@@ -139,58 +138,39 @@ void get_initial_bit_count()
 	vector<thread> threads;
 	vector<promise<double>> promises;
 	vector<future<double>> futures;
+	threads.resize(words.size());
+	promises.resize(words.size());
+	futures.resize(words.size());
 
 	double information;
-	int repeats = ceil((double)words.size() / MAX_THREADS);
 
-	ofstream output_file(OUTPUT_FILE_NAME, ofstream::out | ofstream::trunc);
-	output_file.close();
+	cout << "Begginning thread creation\n";
 
 	auto calculation_start = high_resolution_clock::now();
 
-	for (size_t repeat = 0; repeat < repeats; repeat++)
+	for (size_t index = 0; index < words.size(); index++)
 	{
-		threads.resize(MAX_THREADS);
-		promises.resize(MAX_THREADS);
-		futures.resize(MAX_THREADS);
-		int starting_index = MAX_THREADS * repeat;
-		int end_index = MAX_THREADS * (repeat + 1);
-		int threads_to_create = MAX_THREADS;
-		if (end_index > words.size())
+		word = words[index];
+		futures[index] = promises[index].get_future();
+		threads[index] = thread(simulate_word_probabilities, word, move(promises[index]), Game_state::all_words());
+		if (index % 100 == 0)
 		{
-			threads_to_create = MAX_THREADS - (end_index - words.size());
+			cout << "Finished creating " << index << " (" << (double)index / words.size() << "%) threads\n";
 		}
-		
-		auto start = high_resolution_clock::now();
-
-		for (size_t index = 0; index < threads_to_create; index++)
-		{
-			word = words[starting_index + index];
-			futures[index] = promises[index].get_future();
-			threads[index] = thread(simulate_word_probabilities, word, move(promises[index]), Game_state::all_words());
-		}
-		
-		cout << "Thread batch " << repeat << " creation finished." << endl;
-
-		ofstream file(OUTPUT_FILE_NAME, ios::app);
-
-		for (size_t index = 0; index < threads_to_create; index++)
-		{
-			threads[index].join();
-			information = futures[index].get();
-			// cout << "Word: " << words[starting_index + index] << ", information: " << information << " bits\n";
-			file << words[starting_index + index] << "," << information << ",\n";
-		}
-
-		file.close();
-		auto stop = high_resolution_clock::now();
-		milliseconds duration = duration_cast<milliseconds>(stop - start);
-		cout << "Calculating batch took: " << duration << endl;
-
-		threads.clear();
-		futures.clear();
-		promises.clear();
 	}
+
+	cout << "Finished creating threads\n";
+
+	ofstream file(OUTPUT_FILE_NAME);
+
+	for (size_t index = 0; index < words.size(); index++)
+	{
+		threads[index].join();
+		information = futures[index].get();
+		file << words[index] << "," << information << ",\n";
+	}
+
+	file.close();
 	
 	auto calculation_end = high_resolution_clock::now();
 	milliseconds calculation_duration = duration_cast<milliseconds>(calculation_end - calculation_start);
