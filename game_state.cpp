@@ -40,22 +40,31 @@ void Game_state::_analyze_pattern(const char_vector* word, const char_vector* pa
 	}
 }
 
+bool Game_state::find_letter_in_word(const char letter, const std::string* word)
+{
+	for (size_t index = 0; index < word->size(); index++)
+	{
+		if (word->at(index) == letter)
+		{
+			return true;
+		}
+	}
+	
+	return false;
+}
+
 string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int index)
 {
 	string_vector resulting_list;
 	resulting_list.reserve(_words.size());
-	char_vector pattern_vector(LETTER_COUNT, '.');
-	pattern_vector[index] = letter;
-	const std::string pattern_string(std::string(pattern_vector.begin(), pattern_vector.end()));
-	const std::regex word_pattern(pattern_string);
 	const std::string letter_string(1, letter);
 	const std::regex letter_pattern(letter_string);
 	std::string word;
 
-	for (size_t index = 0; index < _words.size(); index++)
+	for (size_t word_index = 0; word_index < _words.size(); word_index++)
 	{
-		word = _words[index];
-		if (std::regex_search(word, letter_pattern) && !std::regex_search(word, word_pattern))
+		word = _words[word_index];
+		if (!word[index] != letter && find_letter_in_word(letter, &word))
 		{
 			resulting_list.push_back(word);
 		}

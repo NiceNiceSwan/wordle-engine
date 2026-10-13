@@ -31,6 +31,8 @@ private:
 	*/
 	void _analyze_pattern(const char_vector* word, const char_vector* pattern);
 
+	bool find_letter_in_word(const char letter, const std::string* word);
+
 	/** @brief filters words based on the given yellow letter and its position
 	/// @param letter the letter marked in yellow
 	/// @param index the position of the letter in the word
