@@ -81,7 +81,7 @@ string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int
 	for (size_t word_index = 0; word_index < _words.size(); word_index++)
 	{
 		word = _words[word_index];
-		if (!word[index] == letter && find_letter_in_word(letter, &word))
+		if (!(word[index] == letter) && find_letter_in_word(letter, &word))
 		{
 			resulting_list.push_back(word);
 		}
