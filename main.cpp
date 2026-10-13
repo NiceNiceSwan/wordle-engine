@@ -9,6 +9,7 @@
 #define MAX_PATTERN_COMBINATIONS pow(3, 5)
 #define INPUT_FILE_NAME "word_list_2.txt"
 #define OUTPUT_FILE_NAME "first_guess_bits.txt"
+#define SORTED_OUTPUT_FILE_NAME "first_guess_bits_sorted.txt"
 
 #include "game_state.h"
 
@@ -29,12 +30,15 @@ double simulate_word_probabilities_base(string word, string_vector* words);
 
 double simulate_word_probabilities(string word, promise<double> promise, string_vector* words);
 
+void sort_bit_list();
+
 int main()
 {
 	initialize();
-	get_initial_bit_count();
+	// get_initial_bit_count();
 	// play_wordle();
 	// tests();
+	sort_bit_list();
 
 	return 0;
 }
@@ -167,7 +171,7 @@ void get_initial_bit_count()
 	{
 		threads[index].join();
 		information = futures[index].get();
-		file << words[index] << "," << information << ",\n";
+		file << words[index] << "," << information << "\n";
 	}
 
 	file.close();
@@ -258,4 +262,42 @@ string_vector get_words_list(string filename)
 	file.close();
 
 	return words;
+}
+
+bool comparator(pair<string, double>& pair_1, pair<string, double>& pair_2)
+{
+	return pair_1.second < pair_2.second;
+}
+
+void sort_bit_list()
+{
+	ifstream input_file(OUTPUT_FILE_NAME);
+
+	string word;
+	string info_string;
+	double information;
+
+	map<string, double> word_information;
+	vector<pair<string, double>> pair_vector;
+
+	while (!input_file.eof())
+	{
+		getline(input_file, word, ',');
+		getline(input_file, info_string);
+		information = stod(info_string);
+		pair_vector.push_back(pair(word, information));
+	}
+
+	input_file.close();
+	ofstream output_file(SORTED_OUTPUT_FILE_NAME);
+	
+	sort(pair_vector.begin(), pair_vector.end(), comparator);
+
+	for (size_t index = 0; index < pair_vector.size(); index++)
+	{
+		// cout << pair_vector[index].first << ": " << pair_vector[index].second << " bits\n";
+		output_file << pair_vector[index].first << ',' << pair_vector[index].second << "\n";
+	}
+	
+	output_file.close();
 }
