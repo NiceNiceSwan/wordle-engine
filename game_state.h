@@ -1,6 +1,5 @@
 #include <vector>
 #include <string>
-#include <regex>
 
 #define LETTER_COUNT 5
 
@@ -32,6 +31,13 @@ private:
 	void _analyze_pattern(const char_vector* word, const char_vector* pattern);
 
 	bool find_letter_in_word(const char letter, const std::string* word);
+
+	/// @brief checks if word matches the exact pattern. Basically, checks if the word either has the same letter
+	/// on the same place as the pattern, or the pattern has `.` on that place. Basically, implementes 
+	/// a regex search. Only matches first 5 characters.
+	/// @param word pointer to the word
+	/// @return true if the first 5 characters are match, false otherwise
+	bool does_match_exact_pattern(const std::string* word);
 
 	/** @brief filters words based on the given yellow letter and its position
 	/// @param letter the letter marked in yellow

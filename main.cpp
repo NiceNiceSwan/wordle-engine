@@ -4,6 +4,7 @@
 #include <future>
 #include <cmath>
 #include <chrono>
+#include <regex>
 
 #define MAX_PATTERN_COMBINATIONS pow(3, 5)
 #define MAX_THREADS 10
@@ -30,14 +31,22 @@ int main()
 	Game_state::all_words(words);
 	// get_initial_bit_count();
 	// play_wordle();
+	string word = "crane";
+	char_vector word_vector(word.begin(), word.end());
+	string pattern = "bgbgy";
+	char_vector pattern_vector = char_vector(pattern.begin(), pattern.end());
+
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
-    std::chrono::milliseconds duration;
+    std::chrono::microseconds duration;
 
-	start = std::chrono::high_resolution_clock::now();
-	cout << simulate_word_probabilities_base("helio") << endl;
+	// cout << simulate_word_probabilities_base("helio") << endl;
+	Game_state game_state;
+	game_state.filter_words(&word_vector, &pattern_vector);
+
+
 	stop = std::chrono::high_resolution_clock::now();
-	duration = duration_cast<std::chrono::milliseconds>(stop - start);
+	duration = duration_cast<std::chrono::microseconds>(stop - start);
 	std::cout << "Analyzing pattern took: " << duration << std::endl;
 
 	return 0;
