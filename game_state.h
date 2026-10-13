@@ -65,9 +65,11 @@ public:
 
 	// getters
 	string_vector* words() { return &_words; };
+	static string_vector* all_words() { return &_all_words; };
 	static unsigned long long int word_count() { return _word_count; };
 
 	// setters
+	void words(string_vector words) { _words = words; };
 	static void all_words(string_vector words) {_all_words = words; _word_count = words.size(); };
 
 	static std::string convert_number_to_combination(unsigned short int number);

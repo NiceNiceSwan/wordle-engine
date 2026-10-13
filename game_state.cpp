@@ -162,7 +162,7 @@ std::string Game_state::convert_number_to_combination(unsigned short int number)
 	int missing_letters = LETTER_COUNT - result.size();
 	if (missing_letters > 0)
 	{
-		result.insert(0, missing_letters, 'b');
+		result.insert(result.size(), missing_letters, 'b');
 	}
 
 	return result;
