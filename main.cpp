@@ -7,18 +7,24 @@
 #include <regex>
 
 #define MAX_PATTERN_COMBINATIONS pow(3, 5)
-#define MAX_THREADS 10
+#define MAX_THREADS 100
+#define INPUT_FILE_NAME "word_list_2.txt"
+#define OUTPUT_FILE_NAME "first_guess_bits.txt"
 
 #include "game_state.h"
 
 using namespace std;
 using namespace chrono;
 
-string_vector get_words_list(string filename = "word_list_2.txt");
+void initialize();
+
+string_vector get_words_list(string filename = INPUT_FILE_NAME);
 
 void play_wordle();
 
 void get_initial_bit_count();
+
+void tests();
 
 double simulate_word_probabilities_base(string word);
 
@@ -26,30 +32,19 @@ double simulate_word_probabilities(string word, promise<double> promise);
 
 int main()
 {
+	initialize();
+	get_initial_bit_count();
+	// play_wordle();
+	// tests();
+
+	return 0;
+}
+
+void initialize()
+{
 	string_vector words = get_words_list();
 
 	Game_state::all_words(words);
-	// get_initial_bit_count();
-	// play_wordle();
-	string word = "crane";
-	char_vector word_vector(word.begin(), word.end());
-	string pattern = "bgbgy";
-	char_vector pattern_vector = char_vector(pattern.begin(), pattern.end());
-
-    auto start = std::chrono::high_resolution_clock::now();
-    auto stop = std::chrono::high_resolution_clock::now();
-    std::chrono::microseconds duration;
-
-	cout << simulate_word_probabilities_base(word) << endl;
-	Game_state game_state;
-	// game_state.filter_words(&word_vector, &pattern_vector);
-
-
-	stop = std::chrono::high_resolution_clock::now();
-	duration = duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "Analyzing pattern took: " << duration << std::endl;
-
-	return 0;
 }
 
 void play_wordle()
@@ -105,7 +100,12 @@ void get_initial_bit_count()
 	vector<future<double>> futures;
 
 	double information;
-	int repeats = (double)words.size() / MAX_THREADS;
+	int repeats = ceil((double)words.size() / MAX_THREADS);
+
+	ofstream output_file(OUTPUT_FILE_NAME, ofstream::out | ofstream::trunc);
+	output_file.close();
+
+	auto calculation_start = high_resolution_clock::now();
 
 	for (size_t repeat = 0; repeat < repeats; repeat++)
 	{
@@ -120,6 +120,8 @@ void get_initial_bit_count()
 			threads_to_create = MAX_THREADS - (end_index - words.size());
 		}
 		
+		auto start = high_resolution_clock::now();
+
 		for (size_t index = 0; index < threads_to_create; index++)
 		{
 			word = words[starting_index + index];
@@ -129,21 +131,51 @@ void get_initial_bit_count()
 		
 		cout << "Thread batch " << repeat << " creation finished." << endl;
 
-		auto start = high_resolution_clock::now();
+		ofstream file(OUTPUT_FILE_NAME, ios::app);
+
 		for (size_t index = 0; index < threads_to_create; index++)
 		{
 			threads[index].join();
 			information = futures[index].get();
-			cout << "Word: " << words[index] << ", information: " << information << " bits\n";
+			// cout << "Word: " << words[starting_index + index] << ", information: " << information << " bits\n";
+			file << words[starting_index + index] << "," << information << ",\n";
 		}
+
+		file.close();
 		auto stop = high_resolution_clock::now();
 		milliseconds duration = duration_cast<milliseconds>(stop - start);
-		cout << "Calculating batch took: " << duration << "ms" << endl;
+		cout << "Calculating batch took: " << duration << endl;
+
 		threads.clear();
 		futures.clear();
 		promises.clear();
 	}
 	
+	auto calculation_end = high_resolution_clock::now();
+	milliseconds calculation_duration = duration_cast<milliseconds>(calculation_end - calculation_start);
+	cout << "Calculating everything took: " << calculation_duration << endl;
+}
+
+void tests()
+{
+	string word = "crane";
+	char_vector word_vector(word.begin(), word.end());
+	string pattern = "bgbgy";
+	char_vector pattern_vector = char_vector(pattern.begin(), pattern.end());
+
+    auto start = std::chrono::high_resolution_clock::now();
+    auto stop = std::chrono::high_resolution_clock::now();
+    std::chrono::microseconds duration;
+
+	cout << simulate_word_probabilities_base(word) << endl;
+	Game_state game_state;
+	// game_state.filter_words(&word_vector, &pattern_vector);
+	// cout << game_state.words()->size() << endl;
+
+
+	stop = std::chrono::high_resolution_clock::now();
+	duration = duration_cast<std::chrono::microseconds>(stop - start);
+	std::cout << "Analyzing pattern took: " << duration << std::endl;
 }
 
 double simulate_word_probabilities_base(string word)
