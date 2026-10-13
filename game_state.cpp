@@ -178,17 +178,17 @@ void Game_state::filter_words(const char_vector* word, const char_vector* patter
 	_analyze_pattern(word, pattern);
 	stop = std::chrono::high_resolution_clock::now();
 	duration = duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "Analyzing pattern took: " << duration << std::endl;
+	// std::cout << "Analyzing pattern took: " << duration << std::endl;
 
 	start = std::chrono::high_resolution_clock::now();
 	string_vector swap_list = _exclude_black_letters();
 	stop = std::chrono::high_resolution_clock::now();
 	duration = duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "Excluding black letters took: " << duration << std::endl;
+	// std::cout << "Excluding black letters took: " << duration << std::endl;
 
 	start = std::chrono::high_resolution_clock::now();
 	_words = _match_exact_patterns(swap_list);
 	stop = std::chrono::high_resolution_clock::now();
 	duration = duration_cast<std::chrono::microseconds>(stop - start);
-	std::cout << "matching exact patterns took: " << duration << std::endl;
+	// std::cout << "matching exact patterns took: " << duration << std::endl;
 }

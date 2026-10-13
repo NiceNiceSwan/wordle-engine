@@ -40,9 +40,9 @@ int main()
     auto stop = std::chrono::high_resolution_clock::now();
     std::chrono::microseconds duration;
 
-	// cout << simulate_word_probabilities_base("helio") << endl;
+	cout << simulate_word_probabilities_base(word) << endl;
 	Game_state game_state;
-	game_state.filter_words(&word_vector, &pattern_vector);
+	// game_state.filter_words(&word_vector, &pattern_vector);
 
 
 	stop = std::chrono::high_resolution_clock::now();
