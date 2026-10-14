@@ -38,3 +38,6 @@ test_bit_finder: dev_wordle.o compile_bit_finder_dev
 test: dev_wordle.o compile_wordle_dev
 	play.exe
 
+clean:
+	rm *.exe
+	rm *.o
