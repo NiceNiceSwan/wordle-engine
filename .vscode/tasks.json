@@ -2,8 +2,8 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "play_wordle.cpp",
-            "command": "make compile_wordle_prod",
+            "label": "prod compile play",
+            "command": "make prod_compile_play",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -15,8 +15,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "debug play_wordle.cpp",
-            "command": "make compile_wordle_dev",
+            "label": "dev compile play",
+            "command": "make dev_compile_play",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -28,8 +28,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "bit_finder.cpp",
-            "command": "make compile_bit_finder_prod",
+            "label": "prod compile bit finder",
+            "command": "make prod_compile_bit_finder",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -41,8 +41,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "debug bit_finder.cpp",
-            "command": "make compile_bit_finder_dev",
+            "label": "dev compile bit finder",
+            "command": "make dev_compile_bit_finder",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -54,8 +54,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "wordle.cpp",
-            "command": "make prod_wordle.o",
+            "label": "prod compile wordle engine",
+            "command": "make prod_compile_wordle_engine",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -67,8 +67,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "debug wordle.cpp",
-            "command": "make dev_wordle.o",
+            "label": "dev compile wordle engine",
+            "command": "make dev_compile_wordle_engine",
             "problemMatcher": [
                 "$gcc"
             ],

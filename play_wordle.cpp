@@ -61,8 +61,6 @@ void play_wordle()
 		}
 		vector<double> highest_informations(3, 0);
 		vector<int> highest_info_indexes(3, 0);
-		double highest_information = 0;
-		int highest_info_index = 0;
 		for (size_t index = 0; index < words.size(); index++)
 		{
 			threads[index].join();
