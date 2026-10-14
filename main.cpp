@@ -11,7 +11,7 @@
 #define OUTPUT_FILE_NAME "first_guess_bits.txt"
 #define SORTED_OUTPUT_FILE_NAME "first_guess_bits_sorted.txt"
 
-#include "game_state.h"
+#include "wordle.h"
 
 using namespace std;
 using namespace chrono;
@@ -25,10 +25,6 @@ void play_wordle();
 void get_initial_bit_count();
 
 void tests();
-
-double simulate_word_probabilities_base(string word, string_vector* words);
-
-double simulate_word_probabilities(string word, promise<double> promise, string_vector* words);
 
 void sort_bit_list();
 
@@ -47,97 +43,10 @@ void initialize()
 {
 	string_vector words = get_words_list();
 
-	Game_state::all_words(words);
+	Wordle::all_words(words);
 }
 
-void play_wordle()
-{
-	string_vector words = get_words_list();
-	string word;
-	string pattern;
-	char_vector word_vector;
-	char_vector pattern_vector;
 
-	Game_state game_state;
-
-	/// pointer to the _words variable from inside of game_state
-	string_vector* game_state_words;
-
-	for (size_t guess = 0; guess < 6; guess++)
-	{
-		cout << "Please input word:\n";
-		cin >> word;
-		word_vector = char_vector(word.begin(), word.end());
-
-		cout << "Please input pattern:\n";
-		cin >> pattern;
-		pattern_vector = char_vector(pattern.begin(), pattern.end());
-
-		game_state.filter_words(&word_vector, &pattern_vector);
-
-		game_state_words = game_state.words();
-
-		vector<thread> threads(words.size());
-		vector<promise<double>> promises(words.size());
-		vector<future<double>> futures(words.size());
-		vector<double> informations(words.size());
-
-		for (size_t index = 0; index < words.size(); index++)
-		{
-			word = words[index];
-			futures[index] = promises[index].get_future();
-			threads[index] = thread(simulate_word_probabilities, word, move(promises[index]), game_state_words);
-			
-		}
-		vector<double> highest_informations(3, 0);
-		vector<int> highest_info_indexes(3, 0);
-		double highest_information = 0;
-		int highest_info_index = 0;
-		for (size_t index = 0; index < words.size(); index++)
-		{
-			threads[index].join();
-			informations[index] = futures[index].get();
-			if (informations[index] > highest_informations[0])
-			{
-				highest_informations[0] = informations[index];
-				highest_info_indexes[0] = index;
-				continue;
-			}
-			if (informations[index] > highest_informations[1])
-			{
-				highest_informations[1] = informations[index];
-				highest_info_indexes[1] = index;
-				continue;
-			}
-			if (informations[index] > highest_informations[2])
-			{
-				highest_informations[2] = informations[index];
-				highest_info_indexes[2] = index;
-				continue;
-			}
-		}
-		if (game_state_words->size() <= 1)
-		{
-			if (game_state_words->size() == 1)
-			{
-				cout << "Final word: " << game_state_words->front() << endl;
-			}
-			return;
-		}
-		
-		for (size_t index = 0; index < game_state_words->size(); index++)
-		{
-			cout << game_state_words->at(index) << ", ";
-		}
-		cout << endl;
-		for (size_t index = 0; index < highest_informations.size(); index++)
-		{
-			cout << "Highest info word " << index + 1 << ": " << words[highest_info_indexes[index]] << ", information: " << highest_informations[index] << endl;
-		}
-		
-		
-	}
-}
 
 void get_initial_bit_count()
 {
@@ -161,7 +70,7 @@ void get_initial_bit_count()
 	{
 		word = words[index];
 		futures[index] = promises[index].get_future();
-		threads[index] = thread(simulate_word_probabilities, word, move(promises[index]), Game_state::all_words());
+		threads[index] = thread(simulate_word_probabilities, word, move(promises[index]), Wordle::all_words());
 		if (index % 100 == 0)
 		{
 			cout << "Finished creating " << index << " (" << (double)index / words.size() << "%) threads\n";
@@ -197,8 +106,8 @@ void tests()
     auto stop = std::chrono::high_resolution_clock::now();
     std::chrono::microseconds duration;
 
-	cout << simulate_word_probabilities_base(word, Game_state::all_words()) << endl;
-	Game_state game_state;
+	cout << simulate_word_probabilities_base(word, Wordle::all_words()) << endl;
+	Wordle game_state;
 	// game_state.filter_words(&word_vector, &pattern_vector);
 	// cout << game_state.words()->size() << endl;
 
@@ -208,41 +117,6 @@ void tests()
 	std::cout << "Analyzing pattern took: " << duration << std::endl;
 }
 
-double simulate_word_probabilities_base(string word, string_vector* words)
-{
-	char_vector word_vector(word.begin(), word.end());
-	string pattern;
-	char_vector pattern_vector;
-	double total_bits_amount = 0;
-	double probability;
-	double information;
-	for (unsigned short int combination = 0; combination < MAX_PATTERN_COMBINATIONS; combination++)
-	{
-		Game_state game_state(*words);
-		pattern = Game_state::convert_number_to_combination(combination);
-		pattern_vector = char_vector(pattern.begin(), pattern.end());
-
-		game_state.filter_words(&word_vector, &pattern_vector);
-		string_vector* remaining_words = game_state.words();
-
-		probability = (double)remaining_words->size() / words->size();
-		if (probability == 0)
-		{
-			continue;
-		}
-		
-		information = -log2(probability);
-		total_bits_amount += probability * information;
-	}
-	return total_bits_amount;
-}
-
-double simulate_word_probabilities(string word, promise<double> promise, string_vector* words)
-{
-	double value = simulate_word_probabilities_base(word, words);
-	promise.set_value(value);
-	return value;
-}
 
 string_vector get_words_list(string filename)
 {

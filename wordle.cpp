@@ -1,24 +1,29 @@
-#include "game_state.h"
+#include "wordle.h"
 #include <chrono>
 #include <iostream>
+#include <fstream>
+#include <regex>
+#include <cmath>
 
-string_vector Game_state::_all_words;
-unsigned long long int Game_state::_word_count;
+#define MAX_PATTERN_COMBINATIONS pow(3, 5)
 
-Game_state::Game_state()
+string_vector Wordle::_all_words;
+unsigned long long int Wordle::_word_count;
+
+Wordle::Wordle()
 {
 	_words = _all_words;
 	_exact_match = char_vector(LETTER_COUNT, '.');
 }
 
-Game_state::Game_state(string_vector words)
+Wordle::Wordle(string_vector words)
 {
 	_words = words;
 	_exact_match.reserve(LETTER_COUNT);
 	_exact_match = char_vector(LETTER_COUNT, '.');
 }
 
-void Game_state::_analyze_pattern(const char_vector* word, const char_vector* pattern)
+void Wordle::_analyze_pattern(const char_vector* word, const char_vector* pattern)
 {
 	for (unsigned short int index = 0; index < word->size(); index++)
 	{
@@ -41,7 +46,7 @@ void Game_state::_analyze_pattern(const char_vector* word, const char_vector* pa
 	}
 }
 
-bool Game_state::find_letter_in_word(const char letter, const std::string* word)
+bool Wordle::find_letter_in_word(const char letter, const std::string* word)
 {
 	for (size_t index = 0; index < word->size(); index++)
 	{
@@ -54,7 +59,7 @@ bool Game_state::find_letter_in_word(const char letter, const std::string* word)
 	return false;
 }
 
-bool Game_state::does_match_exact_pattern(const std::string* word)
+bool Wordle::does_match_exact_pattern(const std::string* word)
 {
 	for (size_t index = 0; index < LETTER_COUNT; index++)
 	{
@@ -72,7 +77,7 @@ bool Game_state::does_match_exact_pattern(const std::string* word)
 	return true;
 }
 
-string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int index)
+string_vector Wordle::_filter_yellow_letters(char letter, unsigned short int index)
 {
 	string_vector resulting_list;
 	resulting_list.reserve(_words.size());
@@ -90,7 +95,7 @@ string_vector Game_state::_filter_yellow_letters(char letter, unsigned short int
 	return resulting_list;
 }
 
-string_vector Game_state::_exclude_black_letters()
+string_vector Wordle::_exclude_black_letters()
 {
 	string_vector resulting_word_list;
 	resulting_word_list.reserve(_words.size());
@@ -121,7 +126,7 @@ string_vector Game_state::_exclude_black_letters()
 	return resulting_word_list;
 }
 
-string_vector Game_state::_match_exact_patterns(string_vector words)
+string_vector Wordle::_match_exact_patterns(string_vector words)
 {
 	std::string word;
 	string_vector resulting_word_list;
@@ -138,7 +143,7 @@ string_vector Game_state::_match_exact_patterns(string_vector words)
 	return resulting_word_list;
 }
 
-std::string Game_state::convert_number_to_combination(unsigned short int number)
+std::string Wordle::convert_number_to_combination(unsigned short int number)
 {
 	std::string result;
 	unsigned short int remainder;
@@ -168,7 +173,7 @@ std::string Game_state::convert_number_to_combination(unsigned short int number)
 	return result;
 }
 
-void Game_state::filter_words(const char_vector* word, const char_vector* pattern)
+void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 {
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
@@ -191,4 +196,66 @@ void Game_state::filter_words(const char_vector* word, const char_vector* patter
 	stop = std::chrono::high_resolution_clock::now();
 	duration = duration_cast<std::chrono::microseconds>(stop - start);
 	// std::cout << "matching exact patterns took: " << duration << std::endl;
+}
+
+string_vector Wordle::get_words_list(std::string filename = INPUT_FILE_NAME)
+{
+	string_vector words;
+	std::string file_line;
+	std::string word;
+	std::ifstream file(filename);
+
+	std::getline(file, file_line);
+
+	std::regex delimiter("\",\"");
+
+	std::sregex_token_iterator iterator(file_line.begin(), file_line.end(), delimiter, -1);
+	std::sregex_token_iterator end;
+
+	while (iterator != end)
+	{
+		words.push_back(*iterator);
+		++iterator;
+	}
+
+	file.close();
+
+	return words;
+}
+
+double Wordle::simulate_word_probabilities_base(std::string word, string_vector* words)
+{
+	char_vector word_vector(word.begin(), word.end());
+	std::string pattern;
+	char_vector pattern_vector;
+	double total_bits_amount = 0;
+	double probability;
+	double information;
+	for (unsigned short int combination = 0; combination < MAX_PATTERN_COMBINATIONS; combination++)
+	{
+		Wordle game_state(*words);
+		pattern = Wordle::convert_number_to_combination(combination);
+		pattern_vector = char_vector(pattern.begin(), pattern.end());
+
+		game_state.filter_words(&word_vector, &pattern_vector);
+		string_vector* remaining_words = game_state.words();
+
+		probability = (double)remaining_words->size() / words->size();
+		if (probability == 0)
+		{
+			continue;
+		}
+		
+		information = -log2(probability);
+		total_bits_amount += probability * information;
+	}
+
+	return total_bits_amount;
+}
+
+double Wordle::simulate_word_probabilities(std::string word, std::promise<double> promise, string_vector* words)
+{
+	double value = simulate_word_probabilities_base(word, words);
+	promise.set_value(value);
+	return value;
 }

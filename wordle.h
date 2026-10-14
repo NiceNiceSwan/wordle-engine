@@ -1,5 +1,6 @@
 #include <vector>
 #include <string>
+#include <future>
 
 #define LETTER_COUNT 5
 
@@ -7,10 +8,12 @@
 #define YELLOW 1
 #define BLACK 0
 
+#define INPUT_FILE_NAME "word_list_2.txt"
+
 typedef std::vector<std::string> string_vector;
 typedef std::vector<char> char_vector;
 
-class Game_state
+class Wordle
 {
 private:
 	/// @brief holds all words regardless of if they can be the solution or not
@@ -58,8 +61,8 @@ private:
 
 
 public:
-	Game_state();
-	Game_state(string_vector words);
+	Wordle();
+	Wordle(string_vector words);
 
 	void filter_words(const char_vector* word, const char_vector* pattern);
 
@@ -73,4 +76,10 @@ public:
 	static void all_words(string_vector words) {_all_words = words; _word_count = words.size(); };
 
 	static std::string convert_number_to_combination(unsigned short int number);
+
+	static string_vector get_words_list(std::string filename = INPUT_FILE_NAME);
+
+	static double simulate_word_probabilities_base(std::string word, string_vector* words);
+
+	static double simulate_word_probabilities(std::string word, std::promise<double> promise, string_vector* words);
 };
