@@ -39,5 +39,5 @@ test: dev_wordle.o compile_wordle_dev
 	play.exe
 
 clean:
-	rm *.exe
-	rm *.o
+	del *.exe
+	del *.o
