@@ -36,9 +36,9 @@ int main()
 {
 	initialize();
 	// get_initial_bit_count();
-	// play_wordle();
+	play_wordle();
 	// tests();
-	sort_bit_list();
+	// sort_bit_list();
 
 	return 0;
 }
@@ -68,6 +68,7 @@ void play_wordle()
 		cout << "Please input word:\n";
 		cin >> word;
 		word_vector = char_vector(word.begin(), word.end());
+
 		cout << "Please input pattern:\n";
 		cin >> pattern;
 		pattern_vector = char_vector(pattern.begin(), pattern.end());
@@ -76,14 +77,11 @@ void play_wordle()
 
 		game_state_words = game_state.words();
 
-		vector<thread> threads;
-		vector<promise<double>> promises;
-		vector<future<double>> futures;
-		vector<double> informations;
-		threads.resize(words.size());
-		promises.resize(words.size());
-		futures.resize(words.size());
-		informations.resize(words.size());
+		vector<thread> threads(words.size());
+		vector<promise<double>> promises(words.size());
+		vector<future<double>> futures(words.size());
+		vector<double> informations(words.size());
+
 		for (size_t index = 0; index < words.size(); index++)
 		{
 			word = words[index];
@@ -117,9 +115,16 @@ void play_wordle()
 				highest_info_indexes[2] = index;
 				continue;
 			}
-			
-			// cout << "Word: " << words[index] << ", information: " << informations[index] << " bits\n";
 		}
+		if (game_state_words->size() <= 1)
+		{
+			if (game_state_words->size() == 1)
+			{
+				cout << "Final word: " << game_state_words->front() << endl;
+			}
+			return;
+		}
+		
 		for (size_t index = 0; index < game_state_words->size(); index++)
 		{
 			cout << game_state_words->at(index) << ", ";
@@ -127,7 +132,7 @@ void play_wordle()
 		cout << endl;
 		for (size_t index = 0; index < highest_informations.size(); index++)
 		{
-			cout << "Highest info word " << index << ": " << words[highest_info_indexes[index]] << ", information: " << highest_informations[index] << endl;
+			cout << "Highest info word " << index + 1 << ": " << words[highest_info_indexes[index]] << ", information: " << highest_informations[index] << endl;
 		}
 		
 		
