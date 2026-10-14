@@ -10,6 +10,8 @@
 string_vector Wordle::_all_words;
 unsigned long long int Wordle::_word_count;
 
+typedef std::chrono::microseconds time_resolution;
+
 Wordle::Wordle()
 {
 	_words = _all_words;
@@ -177,24 +179,24 @@ void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 {
     auto start = std::chrono::high_resolution_clock::now();
     auto stop = std::chrono::high_resolution_clock::now();
-    std::chrono::microseconds duration;
+    time_resolution duration;
 
 	start = std::chrono::high_resolution_clock::now();
 	_analyze_pattern(word, pattern);
 	stop = std::chrono::high_resolution_clock::now();
-	duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	duration = std::chrono::duration_cast<time_resolution>(stop - start);
 	// std::cout << "Analyzing pattern took: " << duration << std::endl;
 
 	start = std::chrono::high_resolution_clock::now();
 	string_vector swap_list = _exclude_black_letters();
 	stop = std::chrono::high_resolution_clock::now();
-	duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	duration = std::chrono::duration_cast<time_resolution>(stop - start);
 	// std::cout << "Excluding black letters took: " << duration << std::endl;
 
 	start = std::chrono::high_resolution_clock::now();
 	_words = _match_exact_patterns(swap_list);
 	stop = std::chrono::high_resolution_clock::now();
-	duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+	duration = std::chrono::duration_cast<time_resolution>(stop - start);
 	// std::cout << "matching exact patterns took: " << duration << std::endl;
 }
 

@@ -7,7 +7,7 @@ wordle_object = wordle.o
 play_wordle = play_wordle.cpp
 bit_finder = bit_finder.cpp
 
-all: prod_compile_play prod_compile_bit_finder
+all: prod_compile_wordle_engine prod_compile_play prod_compile_bit_finder
 
 dev_compile_wordle_engine: $(wordle) wordle.h
 	$(compiler) $(debug_compiler_flags) -c $(wordle) -o $(wordle_object)
