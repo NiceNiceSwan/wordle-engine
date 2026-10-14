@@ -21,6 +21,8 @@ int main()
 void play_wordle()
 {
 	string_vector words = Wordle::get_words_list();
+	Wordle::all_words(words);
+
 	string word;
 	string pattern;
 	char_vector word_vector;
@@ -54,7 +56,7 @@ void play_wordle()
 		{
 			word = words[index];
 			futures[index] = promises[index].get_future();
-			threads[index] = thread(simulate_word_probabilities, word, move(promises[index]), game_state_words);
+			threads[index] = thread(Wordle::simulate_word_probabilities, word, move(promises[index]), game_state_words);
 			
 		}
 		vector<double> highest_informations(3, 0);

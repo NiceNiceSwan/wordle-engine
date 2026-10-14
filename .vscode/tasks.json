@@ -2,21 +2,8 @@
     "tasks": [
         {
             "type": "cppbuild",
-            "label": "C/C++: GCC 12.1.0 build, O3",
-            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
-            "args": [
-                "-O3", // optimization, -O0 don't optmize, -O/O1 optimize, O2 optimize more, O3 optimize as much as possible
-                "-fdiagnostics-color=always",
-                "-g",
-                "-Werror",
-                "-std=c++23",
-                "${workspaceFolder}\\*.cpp",
-                "-o",
-                "${workspaceFolder}\\rooster.exe"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
+            "label": "play_wordle.cpp",
+            "command": "make compile_wordle_prod",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -24,25 +11,12 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Kompilator: C:\\msys64\\ucrt64\\bin\\g++.exe"
+            "detail": "Compiles the binary to play wordle in prod mode"
         },
         {
             "type": "cppbuild",
-            "label": "C/C++: GCC 12.1.0 build, O0",
-            "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
-            "args": [
-                "-O0", // optimization, -O0 don't optmize, -O/O1 optimize, O2 optimize more, O3 optimize as much as possible
-                "-fdiagnostics-color=always",
-                "-g",
-                "-Werror",
-                "-std=c++23",
-                "${workspaceFolder}\\*.cpp",
-                "-o",
-                "${workspaceFolder}\\rooster.exe"
-            ],
-            "options": {
-                "cwd": "${fileDirname}"
-            },
+            "label": "debug play_wordle.cpp",
+            "command": "make compile_wordle_dev",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -50,7 +24,72 @@
                 "kind": "build",
                 "isDefault": true
             },
-            "detail": "Kompilator: C:\\msys64\\ucrt64\\bin\\g++.exe"
+            "detail": "Compiles the binary to play wordle in debug mode"
+        },
+        {
+            "type": "cppbuild",
+            "label": "bit_finder.cpp",
+            "command": "make compile_bit_finder_prod",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Compiles the binary to find the most optimal first guess in prod mode"
+        },
+        {
+            "type": "cppbuild",
+            "label": "debug bit_finder.cpp",
+            "command": "make compile_bit_finder_dev",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Compiles the binary to find the most optimal first guess in debug mode"
+        },
+        {
+            "type": "cppbuild",
+            "label": "wordle.cpp",
+            "command": "make prod_wordle.o",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Compiles the wordle engine object in prod mode"
+        },
+        {
+            "type": "cppbuild",
+            "label": "debug wordle.cpp",
+            "command": "make dev_wordle.o",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Compiles the wordle engine object in debug mode"
+        },
+        {
+            "type": "cppbuild",
+            "label": "compile_all",
+            "command": "make",
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiles both binaries in production mode"
         }
     ],
     "version": "2.0.0"

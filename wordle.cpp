@@ -198,7 +198,7 @@ void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 	// std::cout << "matching exact patterns took: " << duration << std::endl;
 }
 
-string_vector Wordle::get_words_list(std::string filename = INPUT_FILE_NAME)
+string_vector Wordle::get_words_list(std::string filename)
 {
 	string_vector words;
 	std::string file_line;
