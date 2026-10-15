@@ -64,7 +64,8 @@ void Wordle::_analyze_pattern(const char_vector* word, const char_vector* patter
 
 void Wordle::_filter_word_list()
 {
-	string_vector filtered_list(_words.size());
+	string_vector filtered_list;
+	filtered_list.reserve(_words.size());
 	std::string word;
 
 	for (size_t index = 0; index < _words.size(); index++)
@@ -92,7 +93,7 @@ void Wordle::_filter_word_list()
 
 		filtered_list.push_back(word);
 	}
-	
+	_words = filtered_list;
 }
 
 void Wordle::_reset_letter_pass()
