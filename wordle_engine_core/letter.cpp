@@ -21,13 +21,14 @@ void Letter::add_occurence()
 
 void Letter::clamp_occurences()
 {
+	_has_been_spotted = true;
 	_maximum_occurences = _minimum_occurences;
 }
 
 void Letter::spot()
 {
 	pass_spot_counter++;
-	spotted_this_pass = true;
+	_has_been_spotted = true;
 	if (pass_spot_counter > _minimum_occurences)
 	{
 		add_occurence();
@@ -44,6 +45,5 @@ void Letter::spot_yellow(unsigned char index)
 void Letter::finish_pass()
 {
 	pass_spot_counter = 0;
-	spotted_this_pass = false;
 }
 

@@ -18,7 +18,7 @@ private:
 	unsigned char _minimum_occurences = 0;
 	unsigned char _maximum_occurences = 5;
 
-	bool spotted_this_pass = false;
+	bool _has_been_spotted = false;
 	unsigned char pass_spot_counter = 0;
 
 	/// @brief spots on which the letter is green. True means the letter must go there
@@ -35,6 +35,7 @@ public:
 	unsigned char minimum_occurences() const { return _minimum_occurences; };
 	unsigned char maximum_occurences() const { return _maximum_occurences; };
 	bool forbidden_spot(unsigned char index) const { return _forbidden_spots[index]; };
+	bool has_been_spotted() const {return _has_been_spotted; };
 
 	// setters
 

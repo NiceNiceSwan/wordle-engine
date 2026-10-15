@@ -11,7 +11,7 @@
 string_vector Wordle::_all_words;
 unsigned long long int Wordle::_word_count;
 
-typedef std::chrono::microseconds time_resolution;
+typedef std::chrono::nanoseconds time_resolution;
 
 Wordle::Wordle()
 {
@@ -80,6 +80,11 @@ void Wordle::_filter_word_list()
 		for (size_t letter_index = 0; letter_index < LETTERS_IN_ALPHABET; letter_index++)
 		{
 			Letter* letter = &_letters[letter_index];
+			if (!letter->has_been_spotted())
+			{
+				continue;
+			}
+			
 			forbidden = _has_forbidden_letter(letter, &word);
 			if (forbidden)
 			{
@@ -266,15 +271,15 @@ void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
     auto stop = std::chrono::steady_clock::now();
     time_resolution duration;
 
-	start = std::chrono::steady_clock::now();
 	_analyze_pattern(word, pattern);
-	stop = std::chrono::steady_clock::now();
-	duration = std::chrono::duration_cast<time_resolution>(stop - start);
-	std::cout << "Analyzing pattern took: " << duration << std::endl;
 
 	_reset_letter_pass();
 
+	start = std::chrono::steady_clock::now();
 	_filter_word_list();
+	stop = std::chrono::steady_clock::now();
+	duration = std::chrono::duration_cast<time_resolution>(stop - start);
+	std::cout << "Filtering word list took: " << duration << std::endl;
 	// start = std::chrono::steady_clock::now();
 	// string_vector swap_list = _exclude_black_letters();
 	// stop = std::chrono::steady_clock::now();
