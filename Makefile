@@ -52,3 +52,12 @@ test: dev_compile_wordle_engine dev_compile_play
 clean:
 	del *.exe
 	del *.o
+
+dev_test_time_recompile: dev_compile_core
+	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
+
+prod_test_time_recompile: prod_compile_core
+	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
+
+test_time: $(objects)
+	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
