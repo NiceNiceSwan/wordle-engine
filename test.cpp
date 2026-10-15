@@ -25,7 +25,7 @@ int main()
 	auto stop = steady_clock::now();
 	time_resolution duration = duration_cast<time_resolution>(stop - start);
 	cout << "All combinations time: " << duration << endl;
-	cout << "Remaining solutions: " << game.words->size() << endl;
+	cout << "Remaining solutions: " << game.words()->size() << endl;
 
 
 	return 0;
