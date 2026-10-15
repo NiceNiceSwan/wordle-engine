@@ -1,9 +1,10 @@
-#include "wordle.h"
 #include <chrono>
 #include <iostream>
 #include <fstream>
 #include <regex>
 #include <cmath>
+
+#include "wordle.h"
 
 #define MAX_PATTERN_COMBINATIONS pow(3, 5)
 
@@ -37,19 +38,22 @@ Wordle::Wordle(string_vector words)
 
 void Wordle::_analyze_pattern(const char_vector* word, const char_vector* pattern)
 {
-	for (unsigned short int index = 0; index < word->size(); index++)
+	for (unsigned char index = 0; index < word->size(); index++)
 	{
 		char pattern_letter = pattern->at(index);
 		char word_letter = word->at(index);
 		switch (pattern_letter)
 		{
 		case 'y':
-			_words = _filter_yellow_letters(word_letter, index);
+			// _words = _filter_yellow_letters(word_letter, index);
+			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_yellow(index);
 			break;
 		case 'b':
-			_black_letters.push_back(word_letter);
+			// _black_letters.push_back(word_letter);
+			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].clamp_occurences();
 			break;
 		case 'g':
+			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot();
 			_exact_match[index] = word_letter;
 			break;
 		default:
@@ -58,7 +62,48 @@ void Wordle::_analyze_pattern(const char_vector* word, const char_vector* patter
 	}
 }
 
-bool Wordle::find_letter_in_word(const char letter, const std::string* word)
+void Wordle::_filter_word_list()
+{
+	string_vector filtered_list(_words.size());
+	std::string word;
+
+	for (size_t index = 0; index < _words.size(); index++)
+	{
+		word = _words[index];
+		if (!_does_match_exact_pattern(&word))
+		{
+			continue;
+		}
+
+		bool forbidden = false;
+		for (size_t letter_index = 0; letter_index < LETTERS_IN_ALPHABET; letter_index++)
+		{
+			Letter* letter = &_letters[letter_index];
+			forbidden = _has_forbidden_letter(letter, &word);
+			if (forbidden)
+			{
+				break;
+			}
+		}
+		if (forbidden)
+		{
+			continue;
+		}
+
+		filtered_list.push_back(word);
+	}
+	
+}
+
+void Wordle::_reset_letter_pass()
+{
+	for (size_t index = 0; index < LETTERS_IN_ALPHABET; index++)
+	{
+		_letters[index].finish_pass();
+	}
+}
+
+bool Wordle::_find_letter_in_word(const char letter, const std::string* word)
 {
 	for (size_t index = 0; index < word->size(); index++)
 	{
@@ -71,7 +116,36 @@ bool Wordle::find_letter_in_word(const char letter, const std::string* word)
 	return false;
 }
 
-bool Wordle::does_match_exact_pattern(const std::string* word)
+bool Wordle::_has_forbidden_letter(Letter* letter, const std::string* word)
+{
+	unsigned char spot_counter = 0;
+	for (unsigned char index = 0; index < LETTER_COUNT; index++)
+	{
+		char word_letter = word->at(index);
+		if (word_letter != letter->letter())
+		{
+			continue;
+		}
+		if (letter->forbidden_spot(index))
+		{
+			return true;
+		}
+		spot_counter++;
+		if (spot_counter > letter->maximum_occurences())
+		{
+			return true;
+		}
+	}
+
+	if (spot_counter < letter->minimum_occurences())
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool Wordle::_does_match_exact_pattern(const std::string* word)
 {
 	for (size_t index = 0; index < LETTER_COUNT; index++)
 	{
@@ -98,7 +172,7 @@ string_vector Wordle::_filter_yellow_letters(char letter, unsigned short int ind
 	for (size_t word_index = 0; word_index < _words.size(); word_index++)
 	{
 		word = _words[word_index];
-		if (!(word[index] == letter) && find_letter_in_word(letter, &word))
+		if (!(word[index] == letter) && _find_letter_in_word(letter, &word))
 		{
 			resulting_list.push_back(word);
 		}
@@ -122,7 +196,7 @@ string_vector Wordle::_exclude_black_letters()
 		for (size_t black_letter_index = 0; black_letter_index < _black_letters.size(); black_letter_index++)
 		{
 			black_letter = _black_letters[black_letter_index];
-			if (find_letter_in_word(black_letter, &word))
+			if (_find_letter_in_word(black_letter, &word))
 			{
 				forbidden = true;
 				break;
@@ -146,7 +220,7 @@ string_vector Wordle::_match_exact_patterns(string_vector words)
 	for (size_t index = 0; index < words.size(); index++)
 	{
 		word = words[index];
-		if (does_match_exact_pattern(&word))
+		if (_does_match_exact_pattern(&word))
 		{
 			resulting_word_list.push_back(word);
 		}
@@ -197,17 +271,20 @@ void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 	duration = std::chrono::duration_cast<time_resolution>(stop - start);
 	std::cout << "Analyzing pattern took: " << duration << std::endl;
 
-	start = std::chrono::steady_clock::now();
-	string_vector swap_list = _exclude_black_letters();
-	stop = std::chrono::steady_clock::now();
-	duration = std::chrono::duration_cast<time_resolution>(stop - start);
-	std::cout << "Excluding black letters took: " << duration << std::endl;
+	_reset_letter_pass();
 
-	start = std::chrono::steady_clock::now();
-	_words = _match_exact_patterns(swap_list);
-	stop = std::chrono::steady_clock::now();
-	duration = std::chrono::duration_cast<time_resolution>(stop - start);
-	std::cout << "matching exact patterns took: " << duration << std::endl;
+	_filter_word_list();
+	// start = std::chrono::steady_clock::now();
+	// string_vector swap_list = _exclude_black_letters();
+	// stop = std::chrono::steady_clock::now();
+	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
+	// std::cout << "Excluding black letters took: " << duration << std::endl;
+
+	// start = std::chrono::steady_clock::now();
+	// _words = _match_exact_patterns(swap_list);
+	// stop = std::chrono::steady_clock::now();
+	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
+	// std::cout << "matching exact patterns took: " << duration << std::endl;
 }
 
 string_vector Wordle::get_words_list(std::string filename)

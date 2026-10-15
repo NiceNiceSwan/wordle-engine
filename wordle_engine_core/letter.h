@@ -1,3 +1,5 @@
+#include <vector>
+
 /// ASCII code for `a`
 #define ASCII_a_INDEX 97
 /// for a given lowercase char, returns its index in the alphabet
@@ -8,6 +10,7 @@
 #define ALPHABET_INDEX_TO_ASCII(CHAR) (CHAR + ASCII_a_INDEX)
 #define LETTERS_IN_ALPHABET 26
 
+/// @brief represents a single letter of the alphabet
 class Letter
 {
 private:
@@ -18,14 +21,20 @@ private:
 	bool spotted_this_pass = false;
 	unsigned char pass_spot_counter = 0;
 
+	/// @brief spots on which the letter is green. True means the letter must go there
+	std::vector<bool> _green_spots;
+	/// @brief spots on which the letter can't be (cuz it was yellow or black). True means the letter can't go there
+	std::vector<bool> _forbidden_spots;
+
 public:
 	Letter();
 	Letter(char init_letter);
 
 	// getters
-	char letter() { return _letter; };
-	unsigned char minimum_occurences() { return _minimum_occurences; };
-	unsigned char maximum_occurences() { return _maximum_occurences; };
+	char letter() const { return _letter; };
+	unsigned char minimum_occurences() const { return _minimum_occurences; };
+	unsigned char maximum_occurences() const { return _maximum_occurences; };
+	bool forbidden_spot(unsigned char index) const { return _forbidden_spots[index]; };
 
 	// setters
 
@@ -33,5 +42,6 @@ public:
 	void add_occurence();
 	void clamp_occurences();
 	void spot();
+	void spot_yellow(unsigned char index);
 	void finish_pass();
 };
