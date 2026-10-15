@@ -2,6 +2,8 @@
 #include <string>
 #include <future>
 
+#include "letter.h"
+
 #define LETTER_COUNT 5
 
 #define GREEN 2
@@ -26,6 +28,8 @@ private:
 	char_vector _black_letters;
 	/// @brief holds all the green letters and their position
 	char_vector _exact_match;
+
+	std::vector<Letter> _letters;
 
 	/** @brief looks at the given word and pattern, and prepares the inner variables for filtering
 	/// @param word the inputted word
