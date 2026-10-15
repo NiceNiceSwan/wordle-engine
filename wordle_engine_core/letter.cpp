@@ -36,12 +36,7 @@ void Letter::spot()
 
 void Letter::spot_yellow(unsigned char index)
 {
-	pass_spot_counter++;
-	spotted_this_pass = true;
-	if (pass_spot_counter > _minimum_occurences)
-	{
-		add_occurence();
-	}
+	spot();
 	_forbidden_spots[index] = true;
 }
 
