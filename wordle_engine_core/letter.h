@@ -42,9 +42,6 @@ public:
 	// setters
 
 	// functions
-	void add_occurence();
-	void clamp_occurences();
-	void spot();
 	bool spot_yellow(unsigned char index);
 	void spot_black(unsigned char index);
 	void spot_green(unsigned char index);

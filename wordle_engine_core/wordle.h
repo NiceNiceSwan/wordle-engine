@@ -52,22 +52,10 @@ private:
 	/// @return true if the first 5 characters are match, false otherwise
 	bool _does_match_exact_pattern(const std::string* word);
 
-	/** @brief filters words based on the given yellow letter and its position
-	/// @param letter the letter marked in yellow
-	/// @param index the position of the letter in the word
-	/// @return returns a list with all the words matching from `words()` matching the yellow letter */
-	string_vector _filter_yellow_letters(char letter, unsigned short int index);
-
 	/// @brief goes through `_black_letters` and returns a list of all words from `words()` 
 	/// which don't have any of the black letters
 	/// @return returns a list of letters without any black letters
 	string_vector _exclude_black_letters();
-
-	/// @brief for a given list of available words, gives all that match `_exact_match`
-	/// @param words list of words to check
-	/// @return list of words which match the `_exact_match` pattern
-	string_vector _match_exact_patterns(string_vector words);
-
 
 public:
 	Wordle();

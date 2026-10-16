@@ -173,72 +173,6 @@ bool Wordle::_does_match_exact_pattern(const std::string* word)
 	return true;
 }
 
-string_vector Wordle::_filter_yellow_letters(char letter, unsigned short int index)
-{
-	string_vector resulting_list;
-	resulting_list.reserve(_words.size());
-	std::string word;
-
-	for (size_t word_index = 0; word_index < _words.size(); word_index++)
-	{
-		word = _words[word_index];
-		if (!(word[index] == letter) && _find_letter_in_word(letter, &word))
-		{
-			resulting_list.push_back(word);
-		}
-	}
-	
-	return resulting_list;
-}
-
-string_vector Wordle::_exclude_black_letters()
-{
-	string_vector resulting_word_list;
-	resulting_word_list.reserve(_words.size());
-	bool forbidden = false;
-	std::string word;
-	char black_letter;
-
-	for (size_t index = 0; index < _words.size(); index++)
-	{
-		word = _words[index];
-		forbidden = false;
-		for (size_t black_letter_index = 0; black_letter_index < _black_letters.size(); black_letter_index++)
-		{
-			black_letter = _black_letters[black_letter_index];
-			if (_find_letter_in_word(black_letter, &word))
-			{
-				forbidden = true;
-				break;
-			}
-		}
-		
-		if (!forbidden)
-		{
-			resulting_word_list.push_back(word);
-		}
-	}
-	
-	return resulting_word_list;
-}
-
-string_vector Wordle::_match_exact_patterns(string_vector words)
-{
-	std::string word;
-	string_vector resulting_word_list;
-	resulting_word_list.reserve(_words.size());
-	for (size_t index = 0; index < words.size(); index++)
-	{
-		word = words[index];
-		if (_does_match_exact_pattern(&word))
-		{
-			resulting_word_list.push_back(word);
-		}
-	}
-	
-	return resulting_word_list;
-}
-
 std::string Wordle::convert_number_to_combination(unsigned short int number)
 {
 	std::string result;
@@ -279,8 +213,6 @@ bool Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 	{
 		return false;
 	}
-	
-	
 
 	_reset_letter_pass();
 
@@ -289,17 +221,6 @@ bool Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 	// stop = std::chrono::steady_clock::now();
 	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
 	// std::cout << "Filtering word list took: " << duration << std::endl;
-	// start = std::chrono::steady_clock::now();
-	// string_vector swap_list = _exclude_black_letters();
-	// stop = std::chrono::steady_clock::now();
-	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
-	// std::cout << "Excluding black letters took: " << duration << std::endl;
-
-	// start = std::chrono::steady_clock::now();
-	// _words = _match_exact_patterns(swap_list);
-	// stop = std::chrono::steady_clock::now();
-	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
-	// std::cout << "matching exact patterns took: " << duration << std::endl;
 	return true;
 }
 
@@ -335,10 +256,13 @@ double Wordle::simulate_word_probabilities_base(std::string word, string_vector*
 	char_vector pattern_vector;
 	double total_bits_amount = 0;
 	double probability;
+	double total_probability = 0;
 	double information;
+
 	for (unsigned short int combination = 0; combination < MAX_PATTERN_COMBINATIONS; combination++)
 	{
 		Wordle game_state(*words);
+
 		pattern = Wordle::convert_number_to_combination(combination);
 		pattern_vector = char_vector(pattern.begin(), pattern.end());
 
@@ -346,16 +270,17 @@ double Wordle::simulate_word_probabilities_base(std::string word, string_vector*
 		{
 			continue;	// means the pattern is impossible for the given word
 		}
-		string_vector* remaining_words = game_state.words();
 
+		string_vector* remaining_words = game_state.words();
 		int remaining_words_count = remaining_words->size();
 		if (remaining_words_count == 0)
 		{
 			continue;
-		}	// problem: impossible combinations. for example, word nonny with pattern bgyyb. You can't have the first 'n' be black, and then have the 2nd and third yellow
+		}
+
 		probability = (double)remaining_words_count / words->size();
-		
-		information = -log2(probability);
+		total_probability += probability;
+		information = abs(-log2(probability));
 		total_bits_amount += probability * information;
 	}
 

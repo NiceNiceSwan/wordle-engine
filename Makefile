@@ -53,10 +53,10 @@ clean:
 	del *.exe
 	del *.o
 
-dev_test_time_recompile: dev_compile_core
+dev_test_recompile: dev_compile_core
 	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
 
-prod_test_time_recompile: prod_compile_core
+prod_test_recompile: prod_compile_core
 	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
 
 test_time: $(objects)
