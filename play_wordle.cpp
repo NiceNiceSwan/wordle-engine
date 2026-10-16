@@ -5,7 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "wordle.h"
+#include "wordle_engine_core/wordle.h"
 
 using namespace std;
 
@@ -63,6 +63,7 @@ void play_wordle()
 		vector<int> highest_info_indexes(3, 0);
 		for (size_t index = 0; index < words.size(); index++)
 		{
+			// cout << "Finished joining " << index << " threads, word: " << words[index] << endl;
 			threads[index].join();
 			informations[index] = futures[index].get();
 			if (informations[index] > highest_informations[0])

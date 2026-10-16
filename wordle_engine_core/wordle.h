@@ -34,7 +34,8 @@ private:
 	/** @brief looks at the given word and pattern, and prepares the inner variables for filtering
 	/// @param word the inputted word
 	/// @param pattern the pattern given upon inputting the word */
-	void _analyze_pattern(const char_vector* word, const char_vector* pattern);
+	/// @return return true if the pattern is possible, false if it isn't
+	bool _analyze_pattern(const char_vector* word, const char_vector* pattern);
 
 	void _filter_word_list();
 
@@ -72,8 +73,6 @@ public:
 	Wordle();
 	Wordle(string_vector words);
 
-	void filter_words(const char_vector* word, const char_vector* pattern);
-
 	// getters
 	string_vector* words() { return &_words; };
 	static string_vector* all_words() { return &_all_words; };
@@ -82,6 +81,11 @@ public:
 	// setters
 	void words(string_vector words) { _words = words; };
 	static void all_words(string_vector words) {_all_words = words; _word_count = words.size(); };
+
+	// functions
+
+	/// @return true if the pattern for the word is possible, false otherwise
+	bool filter_words(const char_vector* word, const char_vector* pattern);
 
 	static std::string convert_number_to_combination(unsigned short int number);
 

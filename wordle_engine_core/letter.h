@@ -9,6 +9,9 @@
 /// for example, putting in `0` here would return `a`
 #define ALPHABET_INDEX_TO_ASCII(CHAR) (CHAR + ASCII_a_INDEX)
 #define LETTERS_IN_ALPHABET 26
+#define IMPOSSIBLE_PATTERN true
+
+#define INDEX_TO_BITFLAG(index) (1 << index)
 
 /// @brief represents a single letter of the alphabet
 class Letter
@@ -19,12 +22,11 @@ private:
 	unsigned char _maximum_occurences = 5;
 
 	bool _has_been_spotted = false;
+	bool _spotted_black_this_pass = false;
 	unsigned char pass_spot_counter = 0;
 
-	/// @brief spots on which the letter is green. True means the letter must go there
-	std::vector<bool> _green_spots;
-	/// @brief spots on which the letter can't be (cuz it was yellow or black). True means the letter can't go there
-	std::vector<bool> _forbidden_spots;
+	/// @brief spots on which the letter can't be (cuz it was yellow or black). True means the letter can't go there. Is a bitflag.
+	unsigned char _forbidden_spots = 0;
 
 public:
 	Letter();
@@ -34,7 +36,7 @@ public:
 	char letter() const { return _letter; };
 	unsigned char minimum_occurences() const { return _minimum_occurences; };
 	unsigned char maximum_occurences() const { return _maximum_occurences; };
-	bool forbidden_spot(unsigned char index) const { return _forbidden_spots[index]; };
+	bool forbidden_spot(unsigned char index) const { return _forbidden_spots & INDEX_TO_BITFLAG(index); };
 	bool has_been_spotted() const {return _has_been_spotted; };
 
 	// setters
@@ -43,6 +45,8 @@ public:
 	void add_occurence();
 	void clamp_occurences();
 	void spot();
-	void spot_yellow(unsigned char index);
+	bool spot_yellow(unsigned char index);
+	void spot_black(unsigned char index);
+	void spot_green(unsigned char index);
 	void finish_pass();
 };

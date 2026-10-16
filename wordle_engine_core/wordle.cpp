@@ -36,7 +36,7 @@ Wordle::Wordle(string_vector words)
 	}
 }
 
-void Wordle::_analyze_pattern(const char_vector* word, const char_vector* pattern)
+bool Wordle::_analyze_pattern(const char_vector* word, const char_vector* pattern)
 {
 	for (unsigned char index = 0; index < word->size(); index++)
 	{
@@ -46,20 +46,24 @@ void Wordle::_analyze_pattern(const char_vector* word, const char_vector* patter
 		{
 		case 'y':
 			// _words = _filter_yellow_letters(word_letter, index);
-			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_yellow(index);
+			if (_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_yellow(index) == IMPOSSIBLE_PATTERN)
+			{
+				return false;
+			}
 			break;
 		case 'b':
 			// _black_letters.push_back(word_letter);
-			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].clamp_occurences();
+			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_black(index);
 			break;
 		case 'g':
-			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot();
+			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_green(index);
 			_exact_match[index] = word_letter;
 			break;
 		default:
 			break;
 		}
 	}
+	return true;
 }
 
 void Wordle::_filter_word_list()
@@ -265,21 +269,26 @@ std::string Wordle::convert_number_to_combination(unsigned short int number)
 	return result;
 }
 
-void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
+bool Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 {
-    auto start = std::chrono::steady_clock::now();
-    auto stop = std::chrono::steady_clock::now();
-    time_resolution duration;
+    // auto start = std::chrono::steady_clock::now();
+    // auto stop = std::chrono::steady_clock::now();
+    // time_resolution duration;
 
-	_analyze_pattern(word, pattern);
+	if (!_analyze_pattern(word, pattern))
+	{
+		return false;
+	}
+	
+	
 
 	_reset_letter_pass();
 
-	start = std::chrono::steady_clock::now();
+	// start = std::chrono::steady_clock::now();
 	_filter_word_list();
-	stop = std::chrono::steady_clock::now();
-	duration = std::chrono::duration_cast<time_resolution>(stop - start);
-	std::cout << "Filtering word list took: " << duration << std::endl;
+	// stop = std::chrono::steady_clock::now();
+	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
+	// std::cout << "Filtering word list took: " << duration << std::endl;
 	// start = std::chrono::steady_clock::now();
 	// string_vector swap_list = _exclude_black_letters();
 	// stop = std::chrono::steady_clock::now();
@@ -291,6 +300,7 @@ void Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 	// stop = std::chrono::steady_clock::now();
 	// duration = std::chrono::duration_cast<time_resolution>(stop - start);
 	// std::cout << "matching exact patterns took: " << duration << std::endl;
+	return true;
 }
 
 string_vector Wordle::get_words_list(std::string filename)
@@ -332,14 +342,18 @@ double Wordle::simulate_word_probabilities_base(std::string word, string_vector*
 		pattern = Wordle::convert_number_to_combination(combination);
 		pattern_vector = char_vector(pattern.begin(), pattern.end());
 
-		game_state.filter_words(&word_vector, &pattern_vector);
+		if (!game_state.filter_words(&word_vector, &pattern_vector))
+		{
+			continue;	// means the pattern is impossible for the given word
+		}
 		string_vector* remaining_words = game_state.words();
 
-		probability = (double)remaining_words->size() / words->size();
-		if (probability == 0)
+		int remaining_words_count = remaining_words->size();
+		if (remaining_words_count == 0)
 		{
 			continue;
-		}
+		}	// problem: impossible combinations. for example, word nonny with pattern bgyyb. You can't have the first 'n' be black, and then have the 2nd and third yellow
+		probability = (double)remaining_words_count / words->size();
 		
 		information = -log2(probability);
 		total_bits_amount += probability * information;
