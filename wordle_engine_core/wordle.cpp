@@ -11,7 +11,7 @@
 string_vector Wordle::_all_words;
 unsigned long long int Wordle::_word_count;
 
-typedef std::chrono::nanoseconds time_resolution;
+typedef std::chrono::microseconds time_resolution;
 
 Wordle::Wordle()
 {
@@ -73,11 +73,6 @@ void Wordle::_filter_word_list()
 	for (size_t index = 0; index < _words.size(); index++)
 	{
 		word = _words[index];
-		if (!_does_match_exact_pattern(&word))
-		{
-			continue;
-		}
-
 		if (_has_forbidden_letter(&word))
 		{
 			continue;
@@ -103,6 +98,12 @@ bool Wordle::_has_forbidden_letter(const std::string* word)
 	{
 		char letter_char = word->at(letter_index);
 		Letter* letter = &_letters[ASCII_TO_ALPHABET_INDEX(letter_char)];
+		if (_exact_match[letter_index] != '.' && _exact_match[letter_index] != letter_char)
+		{
+			forbidden = true;
+			break;
+		}
+		
 		if (!letter->has_been_spotted())
 		{
 			continue;
@@ -131,24 +132,6 @@ bool Wordle::_has_forbidden_letter(const std::string* word)
 		letter->finish_pass();
 	}
 	return forbidden;
-}
-
-bool Wordle::_does_match_exact_pattern(const std::string* word)
-{
-	for (size_t index = 0; index < LETTER_COUNT; index++)
-	{
-		if (_exact_match[index] == '.')
-		{
-			continue;
-		}
-		
-		if (word->at(index) != _exact_match[index])
-		{
-			return false;
-		}
-	}
-
-	return true;
 }
 
 std::string Wordle::convert_number_to_combination(unsigned short int number)
@@ -183,9 +166,9 @@ std::string Wordle::convert_number_to_combination(unsigned short int number)
 
 bool Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 {
-    // auto start = std::chrono::steady_clock::now();
-    // auto stop = std::chrono::steady_clock::now();
-    // time_resolution duration;
+	// auto start = std::chrono::steady_clock::now();
+	// auto stop = std::chrono::steady_clock::now();
+	// time_resolution duration;
 
 	if (!_analyze_pattern(word, pattern))
 	{

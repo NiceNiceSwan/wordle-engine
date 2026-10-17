@@ -43,13 +43,6 @@ private:
 
 	bool _has_forbidden_letter(const std::string* word);
 
-	/// @brief checks if word matches the exact pattern. Basically, checks if the word either has the same letter
-	/// on the same place as the pattern, or the pattern has `.` on that place. Basically, implementes 
-	/// a regex search. Only matches first 5 characters.
-	/// @param word pointer to the word
-	/// @return true if the first 5 characters are match, false otherwise
-	bool _does_match_exact_pattern(const std::string* word);
-
 public:
 	Wordle();
 	Wordle(string_vector words);

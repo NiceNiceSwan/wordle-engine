@@ -1,6 +1,6 @@
 compiler = g++.exe
-debug_compiler_flags = -Werror -Wall -fdiagnostics-color=always -g -std=c++23 -O0
-production_compiler_flags = -Werror -Wall -fdiagnostics-color=always -std=c++23 -O3
+debug_compiler_flags = -Werror -Wall -fdiagnostics-color=always -g -std=c++23 -O0 -march=native
+production_compiler_flags = -Werror -Wall -fdiagnostics-color=always -std=c++23 -O3 -march=native
 
 src = wordle_engine_core
 

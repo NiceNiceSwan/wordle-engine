@@ -4,7 +4,7 @@
 #include <future>
 #include <chrono>
 
-#include "wordle.h"
+#include "wordle_engine_core/wordle.h"
 
 #define OUTPUT_FILE_NAME "first_guess_bits.txt"
 #define SORTED_OUTPUT_FILE_NAME "first_guess_bits_sorted.txt"
@@ -25,6 +25,7 @@ int main()
 void get_initial_bit_count()
 {
 	string_vector words = Wordle::get_words_list();
+	Wordle::all_words(words);
 	std::string word;
 
 	std::vector<std::thread> threads;
@@ -47,7 +48,7 @@ void get_initial_bit_count()
 		threads[index] = std::thread(Wordle::simulate_word_probabilities, word, move(promises[index]), Wordle::all_words());
 		if (index % 100 == 0)
 		{
-			std::cout << "Finished creating " << index << " (" << (double)index / words.size() << "%) threads\n";
+			std::cout << "Finished creating " << index << " (" << 100 * (double)index / words.size() << "%) threads\n";
 		}
 	}
 
