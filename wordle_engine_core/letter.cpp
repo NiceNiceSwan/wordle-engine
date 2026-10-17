@@ -16,9 +16,9 @@ bool Letter::spot_yellow(unsigned char index)
 		return IMPOSSIBLE_PATTERN;
 	}
 	
-	pass_spot_counter++;
+	_pass_spot_counter++;
 	_has_been_spotted = true;
-	if (pass_spot_counter > _minimum_occurences && _minimum_occurences < _maximum_occurences)
+	if (_pass_spot_counter > _minimum_occurences && _minimum_occurences < _maximum_occurences)
 	{
 		_minimum_occurences++;
 	}
@@ -36,12 +36,10 @@ void Letter::spot_black(unsigned char index)
 
 void Letter::spot_green(unsigned char index)
 {
-	// spot();
-	
-	pass_spot_counter++;
+	_pass_spot_counter++;
 	_has_been_spotted = true;
 	
-	if (pass_spot_counter > _minimum_occurences)
+	if (_pass_spot_counter > _minimum_occurences)
 	{
 		if (_maximum_occurences == _minimum_occurences)
 		{
@@ -52,10 +50,9 @@ void Letter::spot_green(unsigned char index)
 	
 }
 
-
 void Letter::finish_pass()
 {
-	pass_spot_counter = 0;
+	_pass_spot_counter = 0;
 	_spotted_black_this_pass = false;
 }
 

@@ -80,22 +80,7 @@ void Wordle::_filter_word_list()
 			continue;
 		}
 
-		bool forbidden = false;
-		for (size_t letter_index = 0; letter_index < LETTERS_IN_ALPHABET; letter_index++)
-		{
-			Letter* letter = &_letters[letter_index];
-			if (!letter->has_been_spotted())
-			{
-				continue;
-			}
-			
-			forbidden = _has_forbidden_letter(letter, &word);
-			if (forbidden)
-			{
-				break;
-			}
-		}
-		if (forbidden)
+		if (_has_forbidden_letter(&word))
 		{
 			continue;
 		}
@@ -113,46 +98,41 @@ void Wordle::_reset_letter_pass()
 	}
 }
 
-bool Wordle::_find_letter_in_word(const char letter, const std::string* word)
+bool Wordle::_has_forbidden_letter(const std::string* word)
 {
-	for (size_t index = 0; index < word->size(); index++)
+	bool forbidden = false;
+	for (size_t letter_index = 0; letter_index < LETTER_COUNT; letter_index++)
 	{
-		if (word->at(index) == letter)
-		{
-			return true;
-		}
-	}
-	
-	return false;
-}
-
-bool Wordle::_has_forbidden_letter(Letter* letter, const std::string* word)
-{
-	unsigned char spot_counter = 0;
-	for (unsigned char index = 0; index < LETTER_COUNT; index++)
-	{
-		char word_letter = word->at(index);
-		if (word_letter != letter->letter())
+		char letter_char = word->at(letter_index);
+		Letter* letter = &_letters[ASCII_TO_ALPHABET_INDEX(letter_char)];
+		if (!letter->has_been_spotted())
 		{
 			continue;
 		}
-		if (letter->forbidden_spot(index))
+		
+		if (letter->forbidden_spot(letter_index))
 		{
-			return true;
+			forbidden = true;
+			break;
 		}
-		spot_counter++;
-		if (spot_counter > letter->maximum_occurences())
+		letter->increment_spot_counter();
+		if (letter->pass_spot_counter() > letter->maximum_occurences())
 		{
-			return true;
+			forbidden = true;
+			break;
 		}
 	}
 
-	if (spot_counter < letter->minimum_occurences())
+	for (size_t letter_index = 0; letter_index < LETTERS_IN_ALPHABET; letter_index++)
 	{
-		return true;
+		Letter* letter = &_letters[letter_index];
+		if (letter->pass_spot_counter() < letter->minimum_occurences())
+		{
+			forbidden = true;
+		}
+		letter->finish_pass();
 	}
-
-	return false;
+	return forbidden;
 }
 
 bool Wordle::_does_match_exact_pattern(const std::string* word)

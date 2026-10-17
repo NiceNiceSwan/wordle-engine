@@ -41,9 +41,7 @@ private:
 
 	void _reset_letter_pass();
 
-	bool _find_letter_in_word(const char letter, const std::string* word);
-
-	bool _has_forbidden_letter(Letter* letter, const std::string* word);
+	bool _has_forbidden_letter(const std::string* word);
 
 	/// @brief checks if word matches the exact pattern. Basically, checks if the word either has the same letter
 	/// on the same place as the pattern, or the pattern has `.` on that place. Basically, implementes 
@@ -51,11 +49,6 @@ private:
 	/// @param word pointer to the word
 	/// @return true if the first 5 characters are match, false otherwise
 	bool _does_match_exact_pattern(const std::string* word);
-
-	/// @brief goes through `_black_letters` and returns a list of all words from `words()` 
-	/// which don't have any of the black letters
-	/// @return returns a list of letters without any black letters
-	string_vector _exclude_black_letters();
 
 public:
 	Wordle();
