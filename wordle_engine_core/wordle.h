@@ -39,7 +39,7 @@ private:
 
 	void _filter_word_list();
 
-	void _reset_letter_pass();
+	void _reset_letter_pass(const char_vector* word);
 
 	bool _has_forbidden_letter(const std::string* word);
 

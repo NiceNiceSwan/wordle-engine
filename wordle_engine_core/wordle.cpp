@@ -45,14 +45,12 @@ bool Wordle::_analyze_pattern(const char_vector* word, const char_vector* patter
 		switch (pattern_letter)
 		{
 		case 'y':
-			// _words = _filter_yellow_letters(word_letter, index);
 			if (_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_yellow(index) == IMPOSSIBLE_PATTERN)
 			{
 				return false;
 			}
 			break;
 		case 'b':
-			// _black_letters.push_back(word_letter);
 			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_black(index);
 			break;
 		case 'g':
@@ -90,11 +88,11 @@ void Wordle::_filter_word_list()
 	_words = filtered_list;
 }
 
-void Wordle::_reset_letter_pass()
+void Wordle::_reset_letter_pass(const char_vector* word)
 {
-	for (size_t index = 0; index < LETTERS_IN_ALPHABET; index++)
+	for (size_t index = 0; index < LETTER_COUNT; index++)
 	{
-		_letters[index].finish_pass();
+		_letters[ASCII_TO_ALPHABET_INDEX(word->at(index))].finish_pass();
 	}
 }
 
@@ -194,7 +192,7 @@ bool Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 		return false;
 	}
 
-	_reset_letter_pass();
+	_reset_letter_pass(word);
 
 	// start = std::chrono::steady_clock::now();
 	_filter_word_list();
