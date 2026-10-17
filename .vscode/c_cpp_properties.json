@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "SDL3_config",
+            "name": "default",
             "includePath": [
                 "${workspaceFolder}/**"
             ],

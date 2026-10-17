@@ -8,7 +8,7 @@
             "program": "${workspaceFolder}\\play.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -25,7 +25,7 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "debug play_wordle.cpp"
+            "preLaunchTask": "dev compile play"
         },
         {
             "name": "debug bit finder",
@@ -34,7 +34,7 @@
             "program": "${workspaceFolder}\\initial_bit_finder.exe",
             "args": [],
             "stopAtEntry": false,
-            "cwd": "${fileDirname}",
+            "cwd": "${workspaceFolder}",
             "environment": [],
             "externalConsole": false,
             "MIMode": "gdb",
@@ -51,7 +51,32 @@
                     "ignoreFailures": true
                 }
             ],
-            "preLaunchTask": "debug bit_finder.cpp"
+            "preLaunchTask": "dev compile bit finder"
+        },
+        {
+            "name": "debug test",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}\\test.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "miDebuggerPath": "gdb.exe",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ],
         }
     ]
 }

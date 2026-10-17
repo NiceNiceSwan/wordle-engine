@@ -54,8 +54,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "prod compile wordle engine",
-            "command": "make prod_compile_wordle_engine",
+            "label": "prod compile core",
+            "command": "make prod_compile_core",
             "problemMatcher": [
                 "$gcc"
             ],
@@ -67,8 +67,8 @@
         },
         {
             "type": "cppbuild",
-            "label": "dev compile wordle engine",
-            "command": "make dev_compile_wordle_engine",
+            "label": "dev compile core",
+            "command": "make dev_compile_core",
             "problemMatcher": [
                 "$gcc"
             ],
