@@ -38,7 +38,7 @@ Wordle::Wordle(string_vector words)
 
 bool Wordle::_analyze_pattern(const char_vector* word, const char_vector* pattern)
 {
-	for (unsigned char index = 0; index < word->size(); index++)
+	for (unsigned char index = 0; index < LETTER_COUNT; index++)
 	{
 		char pattern_letter = pattern->at(index);
 		char word_letter = word->at(index);
@@ -49,6 +49,7 @@ bool Wordle::_analyze_pattern(const char_vector* word, const char_vector* patter
 			{
 				return false;
 			}
+			_important_letters.insert({word_letter, &_letters[ASCII_TO_ALPHABET_INDEX(word_letter)]});
 			break;
 		case 'b':
 			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_black(index);
@@ -56,6 +57,7 @@ bool Wordle::_analyze_pattern(const char_vector* word, const char_vector* patter
 		case 'g':
 			_letters[ASCII_TO_ALPHABET_INDEX(word_letter)].spot_green(index);
 			_exact_match[index] = word_letter;
+			_important_letters.insert({word_letter, &_letters[ASCII_TO_ALPHABET_INDEX(word_letter)]});
 			break;
 		default:
 			break;
@@ -122,15 +124,24 @@ bool Wordle::_has_forbidden_letter(const std::string* word)
 		}
 	}
 
-	for (size_t letter_index = 0; letter_index < LETTERS_IN_ALPHABET; letter_index++)
+	for (auto letter: _important_letters)
 	{
-		Letter* letter = &_letters[letter_index];
+		if (letter.second->pass_spot_counter() < letter.second->minimum_occurences())
+		{
+			forbidden = true;
+		}
+	}
+	for (size_t letter_index = 0; letter_index < LETTER_COUNT; letter_index++)
+	{
+		char letter_char = word->at(letter_index);
+		Letter* letter = &_letters[ASCII_TO_ALPHABET_INDEX(letter_char)];
 		if (letter->pass_spot_counter() < letter->minimum_occurences())
 		{
 			forbidden = true;
 		}
 		letter->finish_pass();
 	}
+	
 	return forbidden;
 }
 

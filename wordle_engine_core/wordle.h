@@ -1,4 +1,5 @@
 #include <vector>
+#include <map>
 #include <string>
 #include <future>
 
@@ -30,6 +31,7 @@ private:
 	char_vector _exact_match;
 
 	std::vector<Letter> _letters;
+	std::map<char, Letter*> _important_letters;
 
 	/** @brief looks at the given word and pattern, and prepares the inner variables for filtering
 	/// @param word the inputted word
