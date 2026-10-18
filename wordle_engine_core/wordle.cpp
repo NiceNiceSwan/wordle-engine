@@ -131,14 +131,16 @@ bool Wordle::_has_forbidden_letter(const std::string* word)
 			forbidden = true;
 		}
 	}
+	std::map<char, bool> seen_letters;
 	for (size_t letter_index = 0; letter_index < LETTER_COUNT; letter_index++)
 	{
 		char letter_char = word->at(letter_index);
 		Letter* letter = &_letters[ASCII_TO_ALPHABET_INDEX(letter_char)];
-		if (letter->pass_spot_counter() < letter->minimum_occurences())
+		if (letter->pass_spot_counter() < letter->minimum_occurences() && !seen_letters.contains(letter_char))
 		{
 			forbidden = true;
 		}
+		seen_letters.insert({letter_char, true});
 		letter->finish_pass();
 	}
 	

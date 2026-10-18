@@ -89,7 +89,7 @@ int main()
 	}
 	*/
 
-	cout << play_game("dunce");
+	cout << play_game("gaffe");
 	return 0;
 }
 
@@ -113,11 +113,11 @@ game_results play_game(std::string answer, std::string guess)
 	{
 		return game_results::GAME_LOST;
 	}
-	double most_information = 0;
 	string best_word;
 
 	for (size_t guess_number = 1; guess_number < MAX_TOTAL_GUESSES; guess_number++)
 	{
+		double most_information = 0;
 		cout << "Guess: " << guess_number << endl;
 		vector<thread> threads(Wordle::all_words()->size());
 		vector<promise<double>> promises(Wordle::all_words()->size());
@@ -159,6 +159,11 @@ game_results play_game(std::string answer, std::string guess)
 		{
 			return game_results::GAME_LOST;
 		}
+		if (remaining_words->size() == 1)
+		{
+			return guess_number+1 < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
+		}
+		
 	}
 	return game_results::GAME_LOST;
 }
