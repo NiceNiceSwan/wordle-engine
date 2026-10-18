@@ -21,6 +21,12 @@ enum game_results
 	GAME_WON = 1
 };
 
+struct Game_state
+{
+	game_results result;
+	unsigned int guesses = 1;	// there is always at least one guess
+};
+
 typedef std::vector<std::string> string_vector;
 
 using namespace std;
@@ -32,8 +38,14 @@ void play_all_games();
 /// @brief simulates a single wordle game
 /// @param answer the correct answer. Must be lowercase.
 /// @param initial_guess the first guess. Must be lowercase. Defaults to "tares"
-/// @return item from the `game_results` enum
-game_results play_game(std::string answer, std::string initial_guess = "tares");
+/// @return state of the game that was played
+Game_state play_game(std::string answer, std::string initial_guess = "tares");
+
+/// @brief wrapper for `play_game`, instead of returning a value, it analyzes
+/// its result and prints a message to terminal
+/// @param answer the correct answer. Must be lowercase.
+/// @param initial_guess the first guess. Must be lowercase. Defaults to "tares"
+void play_game_wrapper(const std::string answer, const std::string initial_guess = "tares");
 
 string_vector get_answer_list(std::string filename = ANSWERS_FILENAME);
 
@@ -89,16 +101,17 @@ int main()
 	}
 	*/
 
-	cout << play_game("gaffe");
+	play_game_wrapper("gaffe");
 	return 0;
 }
 
-
-game_results play_game(std::string answer, std::string guess)
+Game_state play_game(std::string answer, std::string guess)
 {
+	Game_state game_state;
 	if (answer == guess)
 	{
-		return game_results::GAME_WON;
+		game_state.result = game_results::GAME_WON;
+		return game_state;
 	}
 	
 	string pattern = Wordle::check_answer(guess, answer);
@@ -111,14 +124,14 @@ game_results play_game(std::string answer, std::string guess)
 	string_vector* remaining_words = game.words();
 	if (remaining_words->size() == 0)
 	{
-		return game_results::GAME_LOST;
+		game_state.result = game_results::GAME_LOST;
+		return game_state;
 	}
-	string best_word;
 
-	for (size_t guess_number = 1; guess_number < MAX_TOTAL_GUESSES; guess_number++)
+	for (game_state.guesses = 1; game_state.guesses < MAX_TOTAL_GUESSES; game_state.guesses++)
 	{
 		double most_information = 0;
-		cout << "Guess: " << guess_number << endl;
+		cout << "Guess: " << game_state.guesses << endl;
 		vector<thread> threads(Wordle::all_words()->size());
 		vector<promise<double>> promises(Wordle::all_words()->size());
 		vector<future<double>> futures(Wordle::all_words()->size());
@@ -133,20 +146,19 @@ game_results play_game(std::string answer, std::string guess)
 
 		for (size_t index = 0; index < Wordle::all_words()->size(); index++)
 		{
-			// cout << "Finished joining " << index << " threads, word: " << words[index] << endl;
 			threads[index].join();
 			double guess_information = futures[index].get();
 			if (guess_information > most_information)
 			{
 				most_information = guess_information;
-				best_word = Wordle::all_words()->at(index);
+				guess = Wordle::all_words()->at(index);
 			}
 		}
 
-		guess = best_word;
 		if (guess == answer)
 		{
-			return guess_number < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
+			game_state.result = game_state.guesses < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
+			return game_state;
 		}
 		
 		pattern = Wordle::check_answer(guess, answer);
@@ -157,15 +169,39 @@ game_results play_game(std::string answer, std::string guess)
 		remaining_words = game.words();
 		if (remaining_words->size() == 0)
 		{
-			return game_results::GAME_LOST;
+			game_state.result = game_results::GAME_LOST;
+			return game_state;
 		}
 		if (remaining_words->size() == 1)
 		{
-			return guess_number+1 < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
+			game_state.result = game_state.guesses+1 < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
+			return game_state;
 		}
 		
 	}
-	return game_results::GAME_LOST;
+	game_state.result = game_results::GAME_LOST;
+	return game_state;
+}
+
+void play_game_wrapper(std::string answer, std::string guess)
+{
+	Game_state result = play_game("gaffe");
+	cout << "Game was ";
+	// cout << "Game took " << result.guesses << " guesses and was ";
+	switch (result.result)
+	{
+	case game_results::GAME_LOST:
+		cout << "lost, with no answers found.\n";
+		break;
+	case game_results::GAME_WON:
+		cout << "won, taking " << result.guesses << " guesses.\n";
+		break;
+	case game_results::WENT_BEYOND_6:
+		cout << "lost, taking " << result.guesses << " guesses.\n";
+	default:
+		cout << "ended in an unnatural way, taking " << result.guesses << " guesses.\n";
+		break;
+	}
 }
 
 string_vector get_answer_list(std::string filename)
