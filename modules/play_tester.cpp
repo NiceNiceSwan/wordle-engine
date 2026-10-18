@@ -7,7 +7,7 @@
 
 #include "../wordle_engine_core/wordle.h"
 
-#define ANSWERS_FILENAME "wordle_answers.txt"
+#define ANSWERS_FILENAME "modules/wordle_answers.txt"
 /// have to be <= this many guesses to win
 #define MAX_WINNABLE_GUESSES 6
 /// guesses allowed before we declare that the game is lost
@@ -47,6 +47,10 @@ Game_state play_game(std::string answer, std::string initial_guess = "tares");
 /// @param initial_guess the first guess. Must be lowercase. Defaults to "tares"
 void play_game_wrapper(const std::string answer, const std::string initial_guess = "tares");
 
+/// @brief plays `number_to_play` games. The words picked are based on that number, picking every `total_answers` / `number_to_play` word as the answer
+/// @param number_to_play number of games to play. Is internally capped to the maximum number of answers. Must be positive.
+void play_games(unsigned int number_to_play);
+
 string_vector get_answer_list(std::string filename = ANSWERS_FILENAME);
 
 int main()
@@ -54,54 +58,9 @@ int main()
 	string_vector answers = get_answer_list();
 	string_vector words = Wordle::get_words_list();
 	Wordle::all_words(words);
-	/*
-	/// games in which the answer was guessed in <=6 guesses
-	int won_games = 0;
-	/// games in which it needed >6 guesses to win
-	int games_over_6 = 0;
-	/// games in which the solution was never found
-	int lost_games = 0;
-	string guess;
-	string pattern;
 
-	for (size_t index = 0; index < answers.size(); index++)
-	{
-		guess = "tares";
-		string answer = answers[index];
-		Wordle game(words);
-
-		pattern = Wordle::check_answer(guess, answer);
-		if (pattern == "ggggg")
-		{
-			won_games++;
-			continue;
-		}
-		
-		char_vector guess_vector(guess.begin(), guess.end());
-		char_vector pattern_vector(pattern.begin(), pattern.end());
-		game.filter_words(&guess_vector, &pattern_vector);
-		string_vector* remaining_words = game.words();
-		if (remaining_words->size() == 0)
-		{
-			lost_games++;
-			continue;
-		}
-		double most_information = 0;
-		for (size_t remaining_word_index = 0; remaining_word_index < remaining_words->size(); remaining_word_index++)
-		{
-			
-		}
-		
-		for (size_t guess_number = 1; guess_number < MAX_TOTAL_GUESSES; guess_number++)
-		{
-			
-		}
-		
-
-	}
-	*/
-
-	play_game_wrapper("gaffe");
+	// play_game_wrapper("gaffe");
+	play_games(10);
 	return 0;
 }
 
@@ -131,7 +90,6 @@ Game_state play_game(std::string answer, std::string guess)
 	for (game_state.guesses = 1; game_state.guesses < MAX_TOTAL_GUESSES; game_state.guesses++)
 	{
 		double most_information = 0;
-		cout << "Guess: " << game_state.guesses << endl;
 		vector<thread> threads(Wordle::all_words()->size());
 		vector<promise<double>> promises(Wordle::all_words()->size());
 		vector<future<double>> futures(Wordle::all_words()->size());
@@ -202,6 +160,47 @@ void play_game_wrapper(std::string answer, std::string guess)
 		cout << "ended in an unnatural way, taking " << result.guesses << " guesses.\n";
 		break;
 	}
+}
+
+void play_games(unsigned int number_to_play)
+{
+	string_vector answers = get_answer_list();
+	unsigned int total_answers = answers.size();
+	number_to_play = min(number_to_play, total_answers);
+	unsigned int answer_interval = total_answers / number_to_play;
+
+	unsigned int games_won = 0;
+	unsigned int games_over_6 = 0;
+	unsigned int games_lost = 0;
+	unsigned int total_guesses = 0;
+
+	for (size_t index = 0; index < total_answers; index += answer_interval)
+	{
+		std::string answer = answers[index];
+		cout << "Playing with answer: " << answer << endl;
+		Game_state result = play_game(answer);
+		total_guesses += result.guesses;
+		switch (result.result)
+		{
+		case game_results::GAME_WON:
+			games_won++;
+			break;
+		case game_results::WENT_BEYOND_6:
+			games_over_6++;
+			break;
+		case game_results::GAME_LOST:
+			games_lost++;
+		default:
+			break;
+		}
+	}
+	
+	double average_guess_count = (double)total_guesses / number_to_play;
+
+	cout << "Games won: " << games_won << endl;
+	cout << "Games that went over 6 guesses: " << games_over_6 << endl;
+	cout << "Games lost with no answer: " << games_lost << endl;
+	cout << "Average guess per word: " << average_guess_count << endl;
 }
 
 string_vector get_answer_list(std::string filename)
