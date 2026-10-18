@@ -13,6 +13,12 @@
 
 #define INDEX_TO_BITFLAG(index) (1 << (index))
 
+enum spotting_flags
+{
+	HAS_BEEN_SPOTTED = (1<<0),
+	SPOTTED_BLACK_THIS_PASS = (1<<1),
+};
+
 /// @brief represents a single letter of the alphabet
 class Letter
 {
@@ -21,8 +27,8 @@ private:
 	unsigned char _minimum_occurences = 0;
 	unsigned char _maximum_occurences = 5;
 
-	bool _has_been_spotted = false;
-	bool _spotted_black_this_pass = false;
+	/// @brief bit flag containing data on when and how the letter was spotted
+	unsigned char _spot_flags = 0;
 	unsigned char _pass_spot_counter = 0;
 
 	/// @brief spots on which the letter can't be (cuz it was yellow or black). True means the letter can't go there. Is a bitflag.
@@ -33,17 +39,17 @@ public:
 	Letter(char init_letter);
 
 	// getters
-	char letter() const { return _letter; };
-	unsigned char minimum_occurences() const { return _minimum_occurences; };
-	unsigned char maximum_occurences() const { return _maximum_occurences; };
-	bool has_been_spotted() const {return _has_been_spotted; };
-	unsigned char pass_spot_counter() const { return _pass_spot_counter; };
-	bool forbidden_spot(unsigned char index) const { return _forbidden_spots & INDEX_TO_BITFLAG(index); };
+	inline char letter() const { return _letter; };
+	inline unsigned char minimum_occurences() const { return _minimum_occurences; };
+	inline unsigned char maximum_occurences() const { return _maximum_occurences; };
+	inline bool has_been_spotted() const {return _spot_flags & spotting_flags::HAS_BEEN_SPOTTED; };
+	inline unsigned char pass_spot_counter() const { return _pass_spot_counter; };
+	inline bool forbidden_spot(unsigned char index) const { return _forbidden_spots & INDEX_TO_BITFLAG(index); };
 
 	// setters
 
 	// simple functions
-	void increment_spot_counter() { _pass_spot_counter++; };
+	inline void increment_spot_counter() { _pass_spot_counter++; };
 
 	// functions
 	bool spot_yellow(unsigned char index);
