@@ -57,7 +57,13 @@ dev_test_recompile: dev_compile_core
 	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
 
 prod_test_recompile: prod_compile_core
-	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
+	$(compiler) $(production_compiler_flags) test.cpp -o test.exe $(objects)
 
 test_time: $(objects)
 	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
+
+dev_play_tester_recompile: dev_compile_core
+	$(compiler) $(debug_compiler_flags) modules/play_tester.cpp -o p_test.exe $(objects)
+
+prod_play_tester_recompile: prod_compile_core
+	$(compiler) $(production_compiler_flags) modules/play_tester.cpp -o p_test.exe $(objects)

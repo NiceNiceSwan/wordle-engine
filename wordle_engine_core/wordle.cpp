@@ -175,6 +175,37 @@ std::string Wordle::convert_number_to_combination(unsigned short int number)
 	return result;
 }
 
+std::string Wordle::check_answer(std::string word, std::string answer)
+{
+	unsigned char filled_letters = 0;
+	std::string pattern = "bbbbb";
+	for (size_t answer_index = 0; answer_index < LETTER_COUNT; answer_index++)
+	{
+		if (word[answer_index] == answer[answer_index])
+		{
+			pattern[answer_index] = 'g';
+			filled_letters |= INDEX_TO_BITFLAG(LETTER_COUNT - answer_index);
+			continue;
+		}
+		for (size_t word_index = 0; word_index < LETTER_COUNT; word_index++)
+		{
+			if (filled_letters & INDEX_TO_BITFLAG(LETTER_COUNT - word_index))
+			{
+				continue;
+			}
+
+			if (answer[answer_index] == word[word_index])
+			{
+				pattern[word_index] = 'y';
+				filled_letters |= INDEX_TO_BITFLAG(LETTER_COUNT - word_index);
+				break;
+			}
+		}
+	}
+
+	return pattern;
+}
+
 bool Wordle::filter_words(const char_vector* word, const char_vector* pattern)
 {
 	// auto start = std::chrono::steady_clock::now();

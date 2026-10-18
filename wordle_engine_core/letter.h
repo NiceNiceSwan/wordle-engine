@@ -11,7 +11,7 @@
 #define LETTERS_IN_ALPHABET 26
 #define IMPOSSIBLE_PATTERN true
 
-#define INDEX_TO_BITFLAG(index) (1 << index)
+#define INDEX_TO_BITFLAG(index) (1 << (index))
 
 /// @brief represents a single letter of the alphabet
 class Letter

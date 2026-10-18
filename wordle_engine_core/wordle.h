@@ -65,6 +65,11 @@ public:
 
 	static std::string convert_number_to_combination(unsigned short int number);
 
+	/// @param word word to check
+	/// @param answer the real answer
+	/// @return string containing the pattern a word will generate for the answer
+	static std::string check_answer(std::string word, std::string answer);
+
 	static string_vector get_words_list(std::string filename = INPUT_FILE_NAME);
 
 	static double simulate_word_probabilities_base(std::string word, string_vector* words);
