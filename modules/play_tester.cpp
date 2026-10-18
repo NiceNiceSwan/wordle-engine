@@ -209,7 +209,6 @@ string_vector get_answer_list(std::string filename)
 	string file_line;
 	ifstream file(filename);
 
-	getline(file, file_line);
 	while (getline(file, file_line))
 	{
 		answers.push_back(file_line);
