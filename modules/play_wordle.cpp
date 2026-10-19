@@ -5,7 +5,7 @@
 #include <thread>
 #include <future>
 
-#include "wordle_engine_core/wordle.h"
+#include "../wordle_engine_core/wordle.h"
 
 using namespace std;
 

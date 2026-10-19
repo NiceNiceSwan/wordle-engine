@@ -3,15 +3,15 @@ debug_compiler_flags = -Werror -Wall -fdiagnostics-color=always -g -std=c++23 -O
 production_compiler_flags = -Werror -Wall -fdiagnostics-color=always -std=c++23 -O3 -march=native
 
 src = wordle_engine_core
-modules = modules
+components = modules
 
 letter = letter.cpp
 wordle = wordle.cpp
 
-play_wordle = $(modules)/play_wordle.cpp
-bit_finder = $(modules)/bit_finder.cpp
-test = $(modules)/test.cpp
-play_tester = $(modules)/play_tester.cpp
+play_wordle = $(components)/play_wordle.cpp
+bit_finder = $(components)/bit_finder.cpp
+test = $(components)/test.cpp
+play_tester = $(components)/play_tester.cpp
 
 modules = \
 	$(src)/wordle.cpp	\

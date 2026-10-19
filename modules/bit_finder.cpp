@@ -4,7 +4,7 @@
 #include <future>
 #include <chrono>
 
-#include "wordle_engine_core/wordle.h"
+#include "../wordle_engine_core/wordle.h"
 
 #define OUTPUT_FILE_NAME "first_guess_bits.txt"
 #define SORTED_OUTPUT_FILE_NAME "first_guess_bits_sorted.txt"
