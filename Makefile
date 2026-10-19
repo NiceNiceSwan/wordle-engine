@@ -3,11 +3,15 @@ debug_compiler_flags = -Werror -Wall -fdiagnostics-color=always -g -std=c++23 -O
 production_compiler_flags = -Werror -Wall -fdiagnostics-color=always -std=c++23 -O3 -march=native
 
 src = wordle_engine_core
+modules = modules
 
 letter = letter.cpp
 wordle = wordle.cpp
-play_wordle = play_wordle.cpp
-bit_finder = bit_finder.cpp
+
+play_wordle = $(modules)/play_wordle.cpp
+bit_finder = $(modules)/bit_finder.cpp
+test = $(modules)/test.cpp
+play_tester = $(modules)/play_tester.cpp
 
 modules = \
 	$(src)/wordle.cpp	\
@@ -54,16 +58,19 @@ clean:
 	del *.o
 
 dev_test_recompile: dev_compile_core
-	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
+	$(compiler) $(debug_compiler_flags) $(test) -o test.exe $(objects)
 
 prod_test_recompile: prod_compile_core
-	$(compiler) $(production_compiler_flags) test.cpp -o test.exe $(objects)
+	$(compiler) $(production_compiler_flags) $(test) -o test.exe $(objects)
 
 test_time: $(objects)
-	$(compiler) $(debug_compiler_flags) test.cpp -o test.exe $(objects)
+	$(compiler) $(debug_compiler_flags) $(test) -o test.exe $(objects)
 
 dev_play_tester_recompile: dev_compile_core
-	$(compiler) $(debug_compiler_flags) modules/play_tester.cpp -o p_test.exe $(objects)
+	$(compiler) $(debug_compiler_flags) $(play_tester) -o p_test.exe $(objects)
 
 prod_play_tester_recompile: prod_compile_core
-	$(compiler) $(production_compiler_flags) modules/play_tester.cpp -o p_test.exe $(objects)
+	$(compiler) $(production_compiler_flags) $(play_tester) -o p_test.exe $(objects)
+
+play_test: $(objects)
+	$(compiler) $(debug_compiler_flags) $(test) -o p_test.exe $(objects)

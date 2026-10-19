@@ -7,7 +7,7 @@
 
 #include "../wordle_engine_core/wordle.h"
 
-#define ANSWERS_FILENAME "modules/wordle_answers.txt"
+#define ANSWERS_FILENAME "wordle_answers.txt"
 /// have to be <= this many guesses to win
 #define MAX_WINNABLE_GUESSES 6
 /// guesses allowed before we declare that the game is lost
@@ -87,6 +87,7 @@ Game_state play_game(std::string answer, std::string guess)
 		return game_state;
 	}
 
+	// starting from 1, because guess nr. 0 was the one above us, outside the loop
 	for (game_state.guesses = 1; game_state.guesses < MAX_TOTAL_GUESSES; game_state.guesses++)
 	{
 		double most_information = 0;
@@ -99,7 +100,6 @@ Game_state play_game(std::string answer, std::string guess)
 			guess = Wordle::all_words()->at(index);
 			futures[index] = promises[index].get_future();
 			threads[index] = thread(Wordle::simulate_word_probabilities, guess, move(promises[index]), remaining_words);
-			
 		}
 
 		for (size_t index = 0; index < Wordle::all_words()->size(); index++)
@@ -115,6 +115,8 @@ Game_state play_game(std::string answer, std::string guess)
 
 		if (guess == answer)
 		{
+			// we have to guess to know this
+			game_state.guesses++;
 			game_state.result = game_state.guesses < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
 			return game_state;
 		}
@@ -132,7 +134,8 @@ Game_state play_game(std::string answer, std::string guess)
 		}
 		if (remaining_words->size() == 1)
 		{
-			game_state.result = game_state.guesses+1 < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
+			game_state.guesses++;
+			game_state.result = game_state.guesses < MAX_WINNABLE_GUESSES ? game_results::GAME_WON : game_results::WENT_BEYOND_6;
 			return game_state;
 		}
 		
@@ -145,7 +148,6 @@ void play_game_wrapper(std::string answer, std::string guess)
 {
 	Game_state result = play_game("gaffe");
 	cout << "Game was ";
-	// cout << "Game took " << result.guesses << " guesses and was ";
 	switch (result.result)
 	{
 	case game_results::GAME_LOST:
@@ -174,7 +176,7 @@ void play_games(unsigned int number_to_play)
 	unsigned int games_lost = 0;
 	unsigned int total_guesses = 0;
 
-	for (size_t index = 0; index < total_answers; index += answer_interval)
+	for (size_t index = answer_interval; index < total_answers; index += answer_interval)
 	{
 		std::string answer = answers[index];
 		cout << "Playing with answer: " << answer << endl;

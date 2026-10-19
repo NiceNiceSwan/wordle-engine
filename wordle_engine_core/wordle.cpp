@@ -129,8 +129,10 @@ bool Wordle::_has_forbidden_letter(const std::string* word)
 		if (letter.second->pass_spot_counter() < letter.second->minimum_occurences())
 		{
 			forbidden = true;
+			break;
 		}
 	}
+
 	std::map<char, bool> seen_letters;
 	for (size_t letter_index = 0; letter_index < LETTER_COUNT; letter_index++)
 	{
@@ -233,7 +235,6 @@ string_vector Wordle::get_words_list(std::string filename)
 {
 	string_vector words;
 	std::string file_line;
-	std::string word;
 	std::ifstream file(filename);
 
 	std::getline(file, file_line);
