@@ -3,10 +3,11 @@
 #include <fstream>
 #include <regex>
 #include <cmath>
+#include <array>
 
 #include "wordle.h"
 
-#define MAX_PATTERN_COMBINATIONS pow(3, 5)
+#define MAX_PATTERN_COMBINATIONS 243
 
 string_vector Wordle::_all_words;
 unsigned long long int Wordle::_word_count;
@@ -179,6 +180,32 @@ std::string Wordle::convert_number_to_combination(unsigned short int number)
 	return result;
 }
 
+unsigned short int Wordle::convert_combination_to_number(std::string pattern)
+{
+	unsigned short int result = 0;
+	for (size_t index = 0; index < LETTER_COUNT; index++)
+	{
+		char letter = pattern[index];
+		unsigned char letter_value = 0;
+		switch (letter)
+		{
+		case 'b':
+			letter_value = 0;
+			break;
+		case 'y':
+			letter_value = 1;
+			break;
+		case 'g':
+			letter_value = 2;
+			break;
+		default:
+			break;
+		}
+		result += letter_value * pow(3, index);
+	}
+	return result;
+}
+
 std::string Wordle::check_answer(std::string word, std::string answer)
 {
 	unsigned char filled_letters = 0;
@@ -259,32 +286,30 @@ double Wordle::simulate_word_probabilities_base(std::string word, string_vector*
 {
 	char_vector word_vector(word.begin(), word.end());
 	std::string pattern;
+	int pattern_index;
 	char_vector pattern_vector;
 	double total_bits_amount = 0;
 	double probability;
 	double total_probability = 0;
 	double information;
 
-	for (unsigned short int combination = 0; combination < MAX_PATTERN_COMBINATIONS; combination++)
+	std::array<unsigned short int, MAX_PATTERN_COMBINATIONS> matching_words = {0};
+
+	for (size_t index = 0; index < words->size(); index++)
 	{
-		Wordle game_state(*words);
-
-		pattern = Wordle::convert_number_to_combination(combination);
-		pattern_vector = char_vector(pattern.begin(), pattern.end());
-
-		if (!game_state.filter_words(&word_vector, &pattern_vector))
-		{
-			continue;	// means the pattern is impossible for the given word
-		}
-
-		string_vector* remaining_words = game_state.words();
-		int remaining_words_count = remaining_words->size();
-		if (remaining_words_count == 0)
+		pattern = Wordle::check_answer(word, words->at(index));
+		pattern_index = Wordle::convert_combination_to_number(pattern);
+		matching_words[pattern_index] += 1;
+	}
+	
+	for (size_t index = 0; index < MAX_PATTERN_COMBINATIONS; index++)
+	{
+		if (matching_words[index] == 0)
 		{
 			continue;
 		}
-
-		probability = (double)remaining_words_count / words->size();
+		
+		probability = (double)matching_words[index] / words->size();
 		total_probability += probability;
 		information = abs(-log2(probability));
 		total_bits_amount += probability * information;

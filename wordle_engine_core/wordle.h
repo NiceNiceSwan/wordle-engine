@@ -65,6 +65,8 @@ public:
 
 	static std::string convert_number_to_combination(unsigned short int number);
 
+	static unsigned short int convert_combination_to_number(std::string pattern);
+
 	/// @param word word to check
 	/// @param answer the real answer
 	/// @return string containing the pattern a word will generate for the answer
