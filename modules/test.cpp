@@ -18,14 +18,14 @@ int main()
 	Wordle::all_words(words);
 	
 	Wordle game(words);
-	// string_vector* game_state_words;
-	// double information;
 
 	string word = "tares";
 	char_vector word_vector(word.begin(), word.end());
 	string pattern = "bbbyb";
 	char_vector pattern_vector(pattern.begin(), pattern.end());
 
+	// string_vector* game_state_words;
+	// double information;
 	// game_state_words = game.words();
 	// start = steady_clock::now();
 	// information = Wordle::simulate_word_probabilities_base(word, game_state_words);

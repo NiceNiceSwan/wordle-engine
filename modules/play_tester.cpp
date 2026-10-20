@@ -53,14 +53,25 @@ void play_games(unsigned int number_to_play);
 
 string_vector get_answer_list(std::string filename = ANSWERS_FILENAME);
 
+typedef std::chrono::milliseconds time_resolution;
+
 int main()
 {
+	auto start = steady_clock::now();
+	auto stop = steady_clock::now();
+	time_resolution duration;
+
+	unsigned long long int games_to_play = 30;
 	string_vector answers = get_answer_list();
 	string_vector words = Wordle::get_words_list();
 	Wordle::all_words(words);
 
 	// play_game_wrapper("gaffe");
-	play_games(10);
+	start = steady_clock::now();
+	play_games(games_to_play);
+	stop = steady_clock::now();
+	duration = duration_cast<time_resolution>(stop - start);
+	cout << "Playing " << games_to_play << " games took: " << duration << endl;
 	return 0;
 }
 
