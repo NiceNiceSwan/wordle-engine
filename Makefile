@@ -21,7 +21,7 @@ objects = \
 	wordle.o	\
 	letter.o	\
 
-all: prod_compile_wordle_engine prod_compile_play prod_compile_bit_finder
+all: prod_compile_core prod_compile_play prod_compile_bit_finder
 
 dev_compile_core: $(modules)
 	$(compiler) $(debug_compiler_flags) -c $^
